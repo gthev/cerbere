@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Cerbere</title>
+    <link href="/client/style.css" rel="stylesheet" />
+</head>
+<body>
+
+    <div id="gameArea">
+
+    </div>
+
+    <script id="loginScreen" type="text/template">
+
+        <div><h2>Login page</h2></div>
+
+        <form id="loginForm" method="post">
+            <div>
+                <label for="passwd">Mot de passe :</label>
+                <input type="password" id="logPasswd" name="passwd">
+            </div>
+            <div>
+                <label for="mail">Pseudo :</label>
+                <input type="text" id="logPseudo" name="pseudo" maxlength="15">
+            </div>
+            <div class="loginButton">
+                <button type="submit">Login</button>
+            </div>
+
+        </form>
+
+        <div id="invalidPasswd" style="color: red;"></div>
+
+    </script>
+
+    <script id="preparationScreen" type="text/template">
+    
+        <div class="chatArea" id="chatAreaPrep">
+            <div class="chatLog" id="chatLogPrep"></div>
+            <form class="chatForm" id="chatFormPrep">
+                <input class="chatInput" id="chatInputPrep" type="text"></input>
+            </form>
+        </div>
+
+    </script>
+
+    <script id="runningGame" type="text/template">
+    
+    </script>
+
+    <!-- used libraries -->
+    <script src="/client/libs/jquery-2.0.2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
+
+    <script src="/client/app.js"></script>
+</body>
+</html>

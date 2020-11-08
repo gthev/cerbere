@@ -1,0 +1,9 @@
+.chatArea .chatLog {
+    width: 500px;
+    height: 100px;
+    overflow-y: scroll;
+}
+
+.chatArea .chatInput {
+    width: 500px;
+}
