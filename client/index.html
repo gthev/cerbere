@@ -23,7 +23,7 @@
             </div>
             <div>
                 <label for="mail">Pseudo :</label>
-                <input type="text" id="logPseudo" name="pseudo" maxlength="15">
+                <input type="text" id="logPseudo" name="pseudo" minlength="3" maxlength="15">
             </div>
             <div class="loginButton">
                 <button type="submit">Login</button>
@@ -53,7 +53,14 @@
     <!-- used libraries -->
     <script src="/client/libs/jquery-2.0.2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script> 
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
 
+    <script>
+        var io_socket = io.connect();
+    </script>
+    <script src="/client/game.js"></script>
     <script src="/client/app.js"></script>
+
 </body>
 </html>

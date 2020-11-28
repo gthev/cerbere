@@ -108,11 +108,18 @@ var Player = function(pseudo_joueur, socket_id) {
         }
     };
 
+    self.destruct = function() {
+        if(this.pion != undefined) {
+            Pions.deletePion(this.pion);
+        }
+    }
+
     return self;
 }
 
 exports.new_player = Player;
 exports.getPlayerColor = function(player) {
+    if(player == undefined) return undefined;
     if(player.pion == undefined) {
         return undefined;
     } else {

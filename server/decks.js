@@ -24,11 +24,15 @@ var initDecks = function() {
     SurvivalDiscards = [];
     TreasonDiscards = [];
 
+    idx_survival = 0;
+    idx_treason = 0;
     // we fill the Survival Deck
     for (var survival_name in deckSurvivalComposition) {
         if (deckSurvivalComposition.hasOwnProperty(survival_name)) {           
             for(var i = 0; i < deckSurvivalComposition[survival_name]; i++) {
-                var new_card = Cards.createSurvival();
+                var new_card = Cards.createSurvival(survival_name);
+                // we define the card's idx/key
+                new_card.effects.forEach(function(effect){effect.idx = idx_survival; idx_survival++});
                 if(new_card != undefined) SurvivalDeck.push(new_card);
             }
         }
@@ -38,7 +42,8 @@ var initDecks = function() {
     for (var treason_name in deckTreasonComposition) {
         if (deckTreasonComposition.hasOwnProperty(treason_name)) {           
             for(var i = 0; i < deckTreasonComposition[treason_name]; i++) {
-                var new_card = Cards.createTreason();
+                var new_card = Cards.createTreason(treason_name);
+                new_card.effects.forEach(function(effect){effect.idx = idx_treason; idx_treason++});
                 if(new_card != undefined) TreasonDeck.push(new_card);
             }
         }
@@ -106,6 +111,27 @@ var discardTreasonCard = function(card) {
 }
 
 // *********************************************
+// *            HANDLING OF COPIES             *
+// *********************************************
+
+var getCopyOfDecks = function() {
+    return {
+        survivaldeck: SurvivalDeck.slice(),
+        survivaldiscard: SurvivalDiscards.slice(),
+        treasondeck: TreasonDeck.slice(),
+        treasondiscards: TreasonDiscards.slice(),
+    };
+}
+
+var restoreCopyOfDecks = function(copy) {
+    SurvivalDeck = copy.survivaldeck;
+    SurvivalDiscards = copy.survivaldiscard;
+    TreasonDeck = copy.treasondeck;
+    TreasonDiscards = copy.treasondiscards;
+}
+
+
+// *********************************************
 // *           EXPORTATION OF SYMBOLS          *
 // *********************************************
 
@@ -116,3 +142,6 @@ exports.discardSurvivalCard = discardSurvivalCard;
 exports.discardTreasonCard = discardTreasonCard;
 exports.createAdventurerDeck = Cards.createAdventurerDeck;
 exports.createCerbereDeck = Cards.createCerbereDeck;
+exports.copyHeroDeck = Cards.copyDeck;
+exports.getCopyState = getCopyOfDecks;
+exports.restoreCopyState = restoreCopyOfDecks;

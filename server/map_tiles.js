@@ -296,6 +296,20 @@ var getRawMap = function(difficulty) {
     }
 }
 
+var getCopyMap = function(rawmap) {
+    var res = [];
+    // the obj in cells are theorically not changed during the game
+    res.cells = rawmap.cells.slice();
+    res.start = rawmap.start;
+    res.unveil = rawmap.unveil;
+    res.pilotis = rawmap.pilotis.slice();
+    res.bridges = rawmap.bridges.map((bridge) => ({connectedCells: bridge.connectedCells.slice(), intact: bridge.intact}));
+    res.portals = rawmap.portals.map((portal) => ({connectedCells: portal.connectedCells.slice(), activator: portal.activator}));
+
+    return res;
+}
+
 //=============================
 
 exports.genNewMap = getRawMap;
+exports.copyMap = getCopyMap;

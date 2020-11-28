@@ -14,7 +14,7 @@ jQuery(function($){
 
     var IO = {
         init: function() {
-            IO.socket = io.connect();
+            IO.socket = io_socket;
             IO.bindEvents();
         },
 
@@ -53,8 +53,6 @@ jQuery(function($){
     var Login = {
         init: function() {
             cache.gameArea.html(cache.logScreen);
-
-            console.log("hi");
 
             var logForm = document.getElementById("loginForm");
             var logPasswd = document.getElementById("logPasswd");
@@ -133,7 +131,14 @@ jQuery(function($){
         }
     }
 
-    IO.init();
-    Login.init();
+    //commented out for debug
+    //IO.init();
+    
+    
+    //Login.init();
+
+    //TODO : change it:
+    cache.gameArea.html(cache.runningGame);
+    playGame();
 
 }($));

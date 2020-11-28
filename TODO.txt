@@ -1,0 +1,22 @@
+Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+
+Icons made by <a href="https://smashicons.com/" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+
+Icons made by <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+
+Icons made by <a href="http://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+
+Icons made by <a href="https://www.flaticon.com/authors/kiranshastry" title="Kiranshastry">Kiranshastry</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+
+Icons made by <a href="https://www.flaticon.com/authors/catalin-fertu" title="Catalin Fertu">Catalin Fertu</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+
+Icons made by <a href="https://www.flaticon.com/authors/google" title="Google">Google</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+
+
+//
+
+Pour l'instant, on ne peut pas appliquer les effets spécifiques sur une case (sauf éventuellement si ce sont des effets généraux, auquel cas TODO)
+Skip and Cancel buttons, barks
+
+/!\ EXPLOIT : prendre la carte pour regarder des barques, regarder la barque, puis faire cancel, et recommencer.
+                Idée : plutôt que de la dire tout de suite, faire un buffer de trucs à afficher, qui sera flushé à la fin de la carte.

@@ -5,13 +5,14 @@ var serv = require('http').Server(app);
 var utils = require('./server/utils')
 //for now, maybe we'll change it later
 var play = require('./server/player');
+var Game = require('./server/manager');
 
-let passwd = utils.gen_passwd();
 
 //************
 //*   DEBUG  *
 //************
 let DEBUG = true;
+let passwd = (DEBUG) ? "pample" : utils.gen_passwd();
 
 // *********************
 // * STARTUP OF SERVER *
@@ -37,6 +38,8 @@ var PLAYERS = {};
 
 var isGameRunning = false;
 
+let GameManager;
+
 function findIdByPseudo(pseudo) {
     var id = undefined;
     SOCK_IDS.forEach(function(le_id) {
@@ -57,10 +60,37 @@ var io = require('socket.io')(serv,{});
 // ***************************
 io.sockets.on('connection', function(socket){
     
-    SOCK_IDS.push(socket.id);
-    SOCKET_LIST[socket.id] = socket;
 
-    chatInit(socket);
+    //=======================================
+    // Just for debug in dev, remove it later
+    if(DEBUG) {
+
+        if(SOCK_IDS.length < 3) {
+
+            SOCK_IDS.push(socket.id);
+            SOCKET_LIST[socket.id] = socket;
+
+            chatInit(socket);
+
+            const pseudoTest = ["mathilde", "jack", "jo", "gwen", "alex", "tif", "mailys"];
+            var count = 0;
+            SOCK_IDS.forEach(function(id){
+                if(PLAYERS[id] != undefined) count++;
+            });
+            var player = play.new_player(pseudoTest[count], socket.id);
+            if(!player.init()) return;
+            PLAYERS[socket.id] = player;
+            
+            if(SOCK_IDS.length == 3) {
+                GameManager = Game.newGame(2, SOCK_IDS.map((id) => (PLAYERS[id])), SOCKET_LIST, 2);
+            }
+
+        }
+        
+        return;
+    };
+    //=======================================
+
 
     //say hi when entering preparation room, and probably other things later
     socket.on('enteredPrep', function() {
@@ -104,17 +134,24 @@ io.sockets.on('connection', function(socket){
         }
     });
 
+    socket.on('disconnect', function() {
+        //clean up, do things
+        var idx_id = SOCK_IDS.indexOf(this.id);
+        if(idx_id == -1) {
+            console.log("not found");
+            return;
+        }
+        SOCK_IDS.splice(idx_id, 1);
+        if(PLAYERS[socket.id] != undefined) PLAYERS[socket.id].destruct();
+        //delete in players ?
+        PLAYERS[socket.id] = undefined;
+        SOCKET_LIST[socket.id] = undefined;
+    });
+
     console.log('Connection initialized');
 });
 
-io.sockets.on('deconnection', function(socket) {
-    //clean up, do things
-    var id = SOCK_IDS.indexOf(socket);
-    SOCK_IDS.splice(id, 1);
-    //delete in players ?
-    PLAYERS[id] = undefined;
-    SOCKET_LIST[id] = undefined;
-});
+
 
 // *****************
 // *   CHAT INIT   *

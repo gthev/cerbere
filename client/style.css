@@ -1,9 +1,86 @@
-.chatArea .chatLog {
-    width: 500px;
-    height: 100px;
+body {
+    background-color: black;
+    color: white;
+}
+
+.gameComponent {
+    border: medium solid orchid;
+    border-radius: 25px;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    padding: 20px;
+    cursor: default;
+}
+
+#listPlayers {
+    color: white;
+    padding: 20px;
+}
+
+.chatArea {
+    padding: 30px;
+}
+
+.chatLog {
+    height: 400px;
     overflow-y: scroll;
+    color: white;
 }
 
 .chatArea .chatInput {
-    width: 500px;
+    width: 95%;
+    cursor: text;
+}
+
+#pisteCerbere {
+    padding: 10px;
+    width: 70%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.columnLeft {
+    float: left;
+    width: 75%;
+}
+
+.columnRight {
+    float: right;
+    width: 20%;
+}
+
+/*=========================
+  =========================
+*/
+
+#deck {
+    display: flex;
+}
+
+.card {
+    width: 8em;
+    border: thin solid blueviolet;
+    margin: 3px;
+}
+
+.effect {
+    border: thin solid greenyellow;
+    margin: 1px;
+}
+
+/*
+===========================
+MAP
+*/
+#gameMap {
+    overflow-x: scroll;
+    display: flex;
+    flex-direction: row;
+}
+
+.mapCell {
+    border: thin solid white;
+    flex: 0 0 80px;
+    height: 40px;
+    margin: 20px;
 }

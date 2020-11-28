@@ -1,8 +1,12 @@
 var Piste = function(max_size, nr_unused) {
 
-    if(nr_unsued >= max_size) return undefined;
+    if(nr_unused >= max_size) return undefined;
 
     var self = {
+
+        //init props:
+        init_props: {max_size: max_size, nr_unused: nr_unused},
+
         //these parameters shouldn't be touched directly during the game
         max_size: max_size,    //independently of the number of players (total and dead)
         actual_size: max_size - nr_unused,
@@ -16,51 +20,51 @@ var Piste = function(max_size, nr_unused) {
 
     // *******************************************************
     // all those functions return true if ok, false if problem
-    self.checkAugmentDice = function() {
-        return (this.dice.current < this.dice.max);
+    self.checkAugmentDice = function(number) {
+        return (self.dice.current + number <= self.dice.max);
     }
 
-    self.checkReduceDice = function() {
-        return (this.dice.current > this.dice.min);
+    self.checkReduceDice = function(number) {
+        return (self.dice.current - number >= self.dice.min);
     }
 
     self.augmentDice = function() {
-        if(!this.checkAugmentDice()) return false;
-        this.dice.current += 1;
+        if(!self.checkAugmentDice(1)) return false;
+        self.dice.current += 1;
         return true;
     }
 
     self.reduceDice = function() {
-        if(!this.checkReduceDice()) return false;
-        this.dice.current -= 1;
+        if(!self.checkReduceDice(1)) return false;
+        self.dice.current -= 1;
         return true;
     }
 
-    self.checkBackDice = function() {
-        return (this.position > 0);
+    self.checkBackDice = function(number) {
+        return (self.position >= number);
     }
 
     self.backDice = function() {
-        if(!this.checkBackDice()) return false;
-        this.dice.position -= 1;
+        if(!self.checkBackDice(1)) return false;
+        self.dice.position -= 1;
         return true;
     }
 
     self.resetDice = function() {
-        this.dice.current = this.dice.min;
+        self.dice.current = self.dice.min;
     }
 
     // *********************************************************************
     // except this one, because it returns whether we activate a hunt or not
     // and because it cannot fail.
     self.advanceDice = function() {
-        if(this.dice.position < this.actual_size - 1) {
+        if(self.dice.position < self.actual_size - 1) {
             //no problem, we just move it forward
-            this.dice.position += 1;
+            self.dice.position += 1;
             return undefined;
         } else {
-            this.dice.position = 0;
-            return this.dice.current;
+            self.dice.position = 0;
+            return self.dice.current;
         }
     }
 
@@ -70,12 +74,27 @@ var Piste = function(max_size, nr_unused) {
     // when a player dies
 
     self.reduceSlopeSize = function() {
-        if(this.actual_size > 1) {
-            this.actual_size -= 1;
+        if(self.actual_size > 1) {
+            self.actual_size -= 1;
         }
     }
 
     return self;
+}
+
+var getCopyPiste = function(piste) {
+    var new_piste = Piste(piste.init_props.max_size, piste.init_props.nr_unused);
+    new_piste.max_size = piste.max_size;
+    new_piste.actual_size = piste.actual_size;
+    let old_dice = piste.dice;
+    new_piste.dice = {
+        min: old_dice.min,
+        max: old_dice.max,
+        current: old_dice.current,
+        position: old_dice.position,
+    };
+
+    return new_piste;
 }
 
 
@@ -83,4 +102,5 @@ var Piste = function(max_size, nr_unused) {
 // *      EXPORTS       *
 // **********************
 
-exports.newPiste = Piste();
+exports.newPiste = Piste;
+exports.copyPiste = getCopyPiste;

@@ -24,6 +24,38 @@ function gen_passwd() {
     return makeid(length);
 }
 
-exports.gen_passwd = gen_passwd;
+function copyEffect(effect) {
+    let new_effect = {targetEffects: [], generalEffects: []};
+    console.log(effect);
+    new_effect.targetEffects = effect.targetEffects.map((subeffect) => (
+        {
+            target: subeffect.target,
+            effect: subeffect.effect,
+            addData: subeffect.addData,
+        }
+    ));
 
+    new_effect.generalEffects = effect.generalEffects.map((subeffect) => (
+        {
+            effect: subeffect.effect,
+            addData: subeffect.addData,
+        }
+    ));
+
+    return new_effect;
+}
+
+function rangeArray(number) {
+    var res = [];
+    if(number <= 0) return res;
+    for(let i=0; i<number; i++) {
+        res.push(i);
+    }
+
+    return res;
+}
+
+exports.gen_passwd = gen_passwd;
+exports.copyEffect = copyEffect;
 exports.shuffle = shuffle;
+exports.rangeArray = rangeArray;
