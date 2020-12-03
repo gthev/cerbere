@@ -171,9 +171,269 @@ var SurvivalCard = function(name) {
             ];
             break;
 
-        // TODO : les autres cartes survies !
+        case "Opportunisme":
+            self.effects = [
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "self",
+                                effect: "step forward",
+                                addData: 1
+                            },
+                            {
+                                target: "other adventurer",
+                                effect: "step back",
+                                addData: 1
+                            }
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [],
+                        generalEffects: [],
+                    }
+                },
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "self",
+                                effect: "step forward",
+                                addData: 1,
+                            },
+                            {
+                                target: "other adventurer",
+                                effect: "step forward",
+                                addData: 2,
+                            }
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [
+                            {
+                                target: "any adventurer",
+                                effect: "discard",
+                                addData: 1,
+                            }
+                        ],
+                        generalEffects: [],
+                    }
+                },
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "self",
+                                effect: "step forward",
+                                addData: 1,
+                            },
+                            {
+                                target: "other adventurer",
+                                effect: "step back",
+                                addData: 2,
+                            }
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [
+                            {
+                                target: "any adventurer",
+                                effect: "discard",
+                                addData: 1
+                            }
+                        ],
+                        generalEffects: [],
+                    }
+                }
+            ];
+            break;
+
+        case "Fatalisme":
+            self.effects = [
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "self",
+                                effect: "step back",
+                                addData: 2,
+                            }
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [],
+                        generalEffects: [],
+                    }
+                },
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "other adventurer",
+                                effect: "step forward",
+                                addData: 3,
+                            }
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [
+                            {
+                                target: "self",
+                                effect: "step back",
+                                addData: 1,
+                            }
+                        ],
+                        generalEffects: [],
+                    }
+                },
+            ];
+            break;
+
+        case "Egoïsme":
+            self.effects = [
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "self",
+                                effect: "step forward",
+                                addData: 1,
+                            }
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [],
+                        generalEffects: [],
+                    }
+                },
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "self",
+                                effect: "step forward",
+                                addData: 2,
+                            }
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [
+                            {
+                                target: "any adventurer",
+                                effect: "discard",
+                                addData: 1,
+                            }
+                        ],
+                        generalEffects: [],
+                    }
+                }
+            ];
+            break;
+
+        case "Couardise":
+            self.effects = [
+                {
+                    effect: {
+                        targetEffects: [],
+                        generalEffects: [
+                            {
+                                effect: "bark",
+                                addData: 0,
+                            }
+                        ],
+                    },
+                    cost: {
+                        targetEffects: [],
+                        generalEffects: [],
+                    }
+                },
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "self",
+                                effect: "step forward",
+                                addData: 2      // TODO : couardise ! Le changer
+                            }
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [
+                            {
+                                target: "any adventurer",
+                                effect: "discard",
+                                addData: 1,
+                            }
+                        ],
+                        generalEffects: [],
+                    }
+                }
+            ];
+            break;
+
+        case "Arrogance":
+            self.effects = [
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "other adventurer",
+                                effect: "step forward",
+                                addData: 1,
+                            },
+                            {
+                                target: "other adventurer",
+                                effect: "step forward",
+                                addData: 1,
+                            }
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [],
+                        generalEffects: [],
+                    }
+                },
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "other adventurer",
+                                effect: "step forward",
+                                addData: 3,
+                            }
+                        ],
+                        generalEffects: [
+                            {
+                                effet: "back dice",
+                                addData: 1,
+                            }
+                        ],
+                    },
+                    cost: {
+                        targetEffects: [
+                            {
+                                target: "any adventurer",
+                                effect: "discard",
+                                addData: 1,
+                            }
+                        ],
+                        generalEffects: [],
+                    }
+                },
+            ];
+            break;
     
         default:
+            console.log("Warning : trying to create card of unkown name : "+name);
             return undefined;
     }
 
@@ -234,12 +494,178 @@ var TreasonCard = function(name) {
                 }
             ]
             break;
+
+        case "Perfidie":
+            self.effects = [
+                {
+                    effect: {
+                        targetEffects: [],
+                        generalEffects: [
+                            {
+                                effect: "augment dice",
+                                addData: 1,
+                            }
+                        ],
+                    },
+                    cost: {
+                        targetEffects: [],
+                        generalEffects: [],
+                    }
+                },
+                {
+                    effect: {
+                        targetEffects: [],
+                        generalEffects: [
+                            {
+                                effect: "advance dice",
+                                addData: 2,
+                            }
+                        ],
+                    },
+                    cost: {
+                        targetEffects: [
+                            {
+                                target: "any cerbere",
+                                effect: "discard",
+                                addData: 1,
+                            }
+                        ],
+                        generalEffects: [],
+                    }
+                }
+            ];
+            break;
+
+        case "Violence":
+            self.effects = [
+                {
+                    effect: {
+                        targetEffects: [],
+                        generalEffects: [
+                            {
+                                effect: "advance dice",
+                                addData: 1,
+                            }
+                        ],
+                    },
+                    cost: {
+                        targetEffects: [],
+                        generalEffects: [],
+                    }
+                },
+                {
+                    effect: {
+                        targetEffects: [],
+                        generalEffects: [
+                            {
+                                effect: "augment dice",
+                                addData: 2,
+                            }
+                        ],
+                    },
+                    cost: {
+                        targetEffects: [
+                            {
+                                target: "any cerbere",
+                                effect: "discard",
+                                addData: 2,
+                            }
+                        ],
+                        generalEffects: [],
+                    }
+                },
+            ];
+            break;
+
+        case "Rancune":
+            self.effects = [
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "other adventurer",
+                                effect: "step back",
+                                addData: 2,
+                            },
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [],
+                        generalEffects: [],
+                    }
+                },
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "all other adventurers",
+                                effect: "step back",
+                                addData: 2,
+                            }
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [{
+                            target: "any cerbere",
+                            effect: "discard",
+                            addData: 2,
+                        }],
+                        generalEffects: [],
+                    }
+                },
+            ];
+            break;
+
+        case "Fourberie":
+            self.effects = [
+                {
+                    effect: {
+                        targetEffects: [],
+                        generalEffects: [
+                            {
+                                effect: "bark",
+                                addData: 0,
+                            }
+                        ],
+                    },
+                    cost: {
+                        targetEffects: [],
+                        generalEffects: [],
+                    }
+                },
+                {
+                    effect: {
+                        targetEffects: [
+                            {
+                                target: "other adventurer",
+                                effect: "step back",
+                                addData: 3,
+                            }
+                        ],
+                        generalEffects: [],
+                    },
+                    cost: {
+                        targetEffects: [
+                            {
+                                target: "other adventurer",
+                                effect: "step forward",
+                                addData: 1,
+                            }
+                        ],
+                        generalEffects: [],
+                    }
+                }
+            ];
+            break;
+
+        // TODO carte sabotage !
     
         default:
             return undefined;
     }
 
-    // TODO : reste des cartes trahisons !
 
     return self;
 }
@@ -416,7 +842,7 @@ function getDefaultAdventurerDeck() {
                     targetEffects: [],
                     generalEffects: [
                         {
-                            target: "advance dice",
+                            effect: "advance dice",
                             addData: 1,
                         }
                     ],
@@ -641,7 +1067,7 @@ function getDefaultCerbereDeck() {
                     targetEffects: [
                         {
                             target: "self",
-                            effect: "draw cerbere",
+                            effect: "draw treason",
                             addData: 1,
                         }
                     ],

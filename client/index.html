@@ -5,8 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <title>Cerbere</title>
     <link href="/client/style.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Piazzolla&family=Texturina&display=swap" rel="stylesheet"> 
 </head>
 <body>
+
+    <div id="icons_loader" style="display:none" onload="initCache();">
+        <img id="img advance dice" src="/client/img/advance_dice.png"/>
+        <img id="img all other adventurers" src="/client/img/all_other_players.png"/>
+        <img id="img augment dice" src="/client/img/augment_dice.png"/>
+        <img id="img back dice" src="/client/img/back_dice.png"/>
+        <img id="img bark" src="/client/img/bark.png">
+        <img id="img cerbere" src="/client/img/cerbere.png"/>
+        <img id="img collect actions" src="/client/img/collect.png"/>
+        <img id="img discard" src="/client/img/discard_survival.png"/>
+        <img id="img discard treason" src="/client/img/discard_treason.png"/>
+        <img id="img hunt" src="/client/img/hunt.png"/>
+        <img id="img other adventurer" src="/client/img/other_adventurer.png"/>
+        <img id="img other cerbere" src="/client/img/other_cerbere.png"/>
+        <img id="img reduce dice" src="/client/img/reduce_dice.png"/>
+        <img id="img self" src="/client/img/self.png"/>
+        <img id="img step back" src="/client/img/step_back.png"/>
+        <img id="img step forward" src="/client/img/step_forward.png"/>
+        <img id="img draw survival" src="/client/img/survival.png"/>
+        <img id="img draw treason" src="/client/img/treason.png"/>
+        <img id="img unveil" src="/client/img/unveil.png"/>
+        <img id="img activator" src="/client/img/activator.png"/>
+        <img id="img bridge" src="/client/img/bridge.png"/>
+        <img id="img portal" src="/client/img/portal.png"/>
+        <img id="img piloti" src="/client/img/pilotis.png"/>
+    </div>
 
     <div id="gameArea">
 
@@ -59,8 +87,14 @@
     <script>
         var io_socket = io.connect();
     </script>
+    <script src="/client/draw.js"></script>
     <script src="/client/game.js"></script>
     <script src="/client/app.js"></script>
+
+    <!-- debug test-->
+    <script>
+        
+    </script>
 
 </body>
 </html>

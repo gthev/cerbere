@@ -16,7 +16,13 @@ Icons made by <a href="https://www.flaticon.com/authors/google" title="Google">G
 //
 
 Pour l'instant, on ne peut pas appliquer les effets spécifiques sur une case (sauf éventuellement si ce sont des effets généraux, auquel cas TODO)
-Skip and Cancel buttons, barks
+Skip le reste des effets ?
+-> check : effet du portail
+-> on ne peut pas désigner deux fois le même joueur comme destinataire d'un effet
+-> ajouter la banner après cancel
+-> carte couardie
+
+On devrait implémenter les effets à appliquer comme une pile globale, avec le joueur concerné à chaque fois...
 
 /!\ EXPLOIT : prendre la carte pour regarder des barques, regarder la barque, puis faire cancel, et recommencer.
                 Idée : plutôt que de la dire tout de suite, faire un buffer de trucs à afficher, qui sera flushé à la fin de la carte.

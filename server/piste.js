@@ -41,7 +41,7 @@ var Piste = function(max_size, nr_unused) {
     }
 
     self.checkBackDice = function(number) {
-        return (self.position >= number);
+        return (self.dice.position >= number);
     }
 
     self.backDice = function() {

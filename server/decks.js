@@ -4,10 +4,19 @@ var Utils = require("./utils")
 const deckSurvivalComposition = {
     "Sacrifice": 4,
     "Favoritisme": 4,
+    "Opportunisme": 4,
+    "Fatalisme": 4,
+    "Egoïsme": 4,
+    "Couardise": 4,
+    "Arrogance": 4,
 }
 
 const deckTreasonComposition = {
-    "Embuscade": 4,
+    "Embuscade": 5,
+    "Perfidie": 5,
+    "Violence": 5,
+    "Rancune": 5,
+    "Fourberie": 5,
 }
 
 var SurvivalDeck = [];
@@ -60,15 +69,15 @@ var initDecks = function() {
 // *     EXPORTED FUNCTIONS TO DRAW/DISCARD CARDS     *
 // ****************************************************
 
-// this function empties the Discards of survival, and put everything in the Deck
+// this function empties the Discards of survival, and puts everything in the Deck
 var shuffleSurvival = function () {
     SurvivalDiscards.forEach(function(card) {
         SurvivalDeck.push(card);
     });
     // we emtpy it
-    SurvivalDeck.length = 0;
+    SurvivalDiscards.length = 0;
 
-    Utils.suffle(SurvivalDeck);
+    Utils.shuffle(SurvivalDeck);
 };
 
 var shuffleTreason = function () {
@@ -76,7 +85,7 @@ var shuffleTreason = function () {
         TreasonDiscards.push(card);
     });
 
-    TreasonDeck.length = 0;
+    TreasonDiscards.length = 0;
 
     Utils.shuffle(TreasonDeck);
 };
@@ -84,9 +93,11 @@ var shuffleTreason = function () {
 // undefined should be interpreted as "no more survival cards" (in deck and in discard)
 var drawSurvivalCard = function() {
     if(SurvivalDeck.length == 0) {
+        console.log("Shuffling deck");
         shuffleSurvival();
     }
     if(SurvivalDeck.length == 0) {
+        console.log("Warning !!! Empty survival deck");
         return undefined;
     }
     return SurvivalDeck.pop();
@@ -135,6 +146,11 @@ var restoreCopyOfDecks = function(copy) {
 // *           EXPORTATION OF SYMBOLS          *
 // *********************************************
 
+initDecks();
+
+exports.printAvailable = function() {
+    console.log(SurvivalDeck.map((effect)=>(effect.effects)));
+};
 exports.initDecks = initDecks;
 exports.drawSurvivalCard = drawSurvivalCard;
 exports.drawTreasonCard = drawTreasonCard;

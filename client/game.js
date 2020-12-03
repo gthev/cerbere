@@ -8,60 +8,101 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ListJoueurs = function (_React$Component) {
-    _inherits(ListJoueurs, _React$Component);
+var Banner = function (_React$Component) {
+    _inherits(Banner, _React$Component);
+
+    function Banner(props) {
+        _classCallCheck(this, Banner);
+
+        var _this = _possibleConstructorReturn(this, (Banner.__proto__ || Object.getPrototypeOf(Banner)).call(this, props));
+
+        _this.state = {
+            text: ""
+        };
+
+        _this.updateText = _this.updateText.bind(_this);
+
+        io_socket.on("updateBannerText", _this.updateText);
+        return _this;
+    }
+
+    _createClass(Banner, [{
+        key: "updateText",
+        value: function updateText(new_text) {
+            this.setState({ text: new_text });
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            return React.createElement(
+                "div",
+                { className: "bannerDiv" },
+                React.createElement(
+                    "h3",
+                    { className: "banner" },
+                    this.state.text
+                )
+            );
+        }
+    }]);
+
+    return Banner;
+}(React.Component);
+
+var ListJoueurs = function (_React$Component2) {
+    _inherits(ListJoueurs, _React$Component2);
 
     /*
-     * expected props : {joueurs: [{couleur: "", pseudo: ""}]}
+     * expected props : {joueurs: [{couleur: "", pseudo: "", state: ""}]}
      * with always at least one element, the self player at the beginning
      */
     function ListJoueurs(props) {
         _classCallCheck(this, ListJoueurs);
 
-        var _this = _possibleConstructorReturn(this, (ListJoueurs.__proto__ || Object.getPrototypeOf(ListJoueurs)).call(this, props));
+        var _this2 = _possibleConstructorReturn(this, (ListJoueurs.__proto__ || Object.getPrototypeOf(ListJoueurs)).call(this, props));
 
-        _this.state = {
+        _this2.state = {
             list: props.joueurs.slice(),
             hoverable: false
         };
 
-        _this.updateHoverable = _this.updateHoverable.bind(_this);
-        _this.updatePlayers = _this.updatePlayers.bind(_this);
+        _this2.updateHoverable = _this2.updateHoverable.bind(_this2);
+        _this2.updatePlayers = _this2.updatePlayers.bind(_this2);
 
         //probably lots of socket binds in constructor
-        io_socket.on('updateListPlayers', _this.updatePlayers);
-        io_socket.on('updateListPlayersHoverable', _this.updateHoverable);
-        return _this;
+        io_socket.on('updateListPlayers', _this2.updatePlayers);
+        io_socket.on('updateListPlayersHoverable', _this2.updateHoverable);
+        return _this2;
     }
 
     _createClass(ListJoueurs, [{
-        key: 'updateHoverable',
+        key: "updateHoverable",
         value: function updateHoverable(val) {
             this.setState({ hoverable: val });
         }
     }, {
-        key: 'handleMouseEnter',
+        key: "handleMouseEnter",
         value: function handleMouseEnter(id) {
             if (!this.state.hoverable) return;
             var divPlayer = document.getElementById(id);
             divPlayer.style.border = "medium solid red";
         }
     }, {
-        key: 'handleMouseLeave',
+        key: "handleMouseLeave",
         value: function handleMouseLeave(id) {
             //if(!this.state.hoverable) return;
             var divPlayer = document.getElementById(id);
             divPlayer.style.border = "";
         }
     }, {
-        key: 'handleClick',
+        key: "handleClick",
         value: function handleClick(pseudo) {
             if (!this.state.hoverable) return;
             console.log('emitting selectedPlayer : ' + pseudo);
             io_socket.emit('selectedPlayer', pseudo);
         }
     }, {
-        key: 'componentDidMount',
+        key: "componentDidMount",
         value: function componentDidMount() {
             this.props.joueurs.forEach(function (player) {
                 var canvas = document.getElementById("canvasListPlayers" + player.couleur);
@@ -75,7 +116,7 @@ var ListJoueurs = function (_React$Component) {
             });
         }
     }, {
-        key: 'updatePlayers',
+        key: "updatePlayers",
         value: function updatePlayers(new_players) {
 
             this.setState({ list: new_players });
@@ -91,44 +132,52 @@ var ListJoueurs = function (_React$Component) {
             });
         }
     }, {
-        key: 'render',
+        key: "render",
         value: function render() {
-            var _this2 = this;
+            var _this3 = this;
 
             var selfPlayer = this.state.list[0];
             var otherPlayers = this.state.list.slice(1);
 
             var otherDivs = otherPlayers.map(function (player) {
                 return React.createElement(
-                    'div',
-                    { key: player.couleur, id: "listPlayers" + player.couleur,
+                    "div",
+                    { key: player.couleur, id: "listPlayers" + player.couleur, className: "pseudoListElement",
                         onMouseEnter: function onMouseEnter() {
-                            return _this2.handleMouseEnter("listPlayers" + player.couleur);
+                            return _this3.handleMouseEnter("listPlayers" + player.couleur);
                         }, onMouseLeave: function onMouseLeave() {
-                            return _this2.handleMouseLeave("listPlayers" + player.couleur);
+                            return _this3.handleMouseLeave("listPlayers" + player.couleur);
                         }, onClick: function onClick() {
-                            return _this2.handleClick(player.pseudo);
+                            return _this3.handleClick(player.pseudo);
                         } },
-                    React.createElement('canvas', { id: "canvasListPlayers" + player.couleur, height: 50, width: 50 }),
+                    React.createElement("canvas", { id: "canvasListPlayers" + player.couleur, height: 50, width: 50 }),
                     React.createElement(
-                        'span',
-                        { className: 'pseudoList' },
-                        player.pseudo
+                        "div",
+                        { className: "pseudoList" },
+                        React.createElement(
+                            "span",
+                            { className: "pseudoList" + player.state },
+                            player.pseudo
+                        )
                     )
                 );
             });
 
             return React.createElement(
-                'div',
-                { id: 'listPlayers', className: 'gameComponent' },
+                "div",
+                { id: "listPlayers", className: "gameComponent" },
                 React.createElement(
-                    'div',
-                    { key: selfPlayer.couleur, id: "listPlayers" + selfPlayer.couleur },
-                    React.createElement('canvas', { id: "canvasListPlayers" + selfPlayer.couleur, width: 50, height: 50 }),
+                    "div",
+                    { key: selfPlayer.couleur, id: "listPlayers" + selfPlayer.couleur, className: "pseudoListElement" },
+                    React.createElement("canvas", { id: "canvasListPlayers" + selfPlayer.couleur, width: 50, height: 50 }),
                     React.createElement(
-                        'span',
-                        { className: 'pseudoList' },
-                        selfPlayer.pseudo
+                        "div",
+                        { className: "pseudoList" },
+                        React.createElement(
+                            "span",
+                            { className: "pseudoList" + selfPlayer.state },
+                            selfPlayer.pseudo
+                        )
                     )
                 ),
                 otherDivs
@@ -139,81 +188,100 @@ var ListJoueurs = function (_React$Component) {
     return ListJoueurs;
 }(React.Component);
 
-var Chat = function (_React$Component2) {
-    _inherits(Chat, _React$Component2);
+var Chat = function (_React$Component3) {
+    _inherits(Chat, _React$Component3);
 
     function Chat(props) {
         _classCallCheck(this, Chat);
 
-        var _this3 = _possibleConstructorReturn(this, (Chat.__proto__ || Object.getPrototypeOf(Chat)).call(this, props));
+        var _this4 = _possibleConstructorReturn(this, (Chat.__proto__ || Object.getPrototypeOf(Chat)).call(this, props));
 
-        _this3.state = {
+        _this4.state = {
             logs: []
 
             //also probably lots of binds here
             //io_socket.removeListener('displayGeneralMessage');
 
-        };_this3.displayGeneralMessage = _this3.displayGeneralMessage.bind(_this3);
-        _this3.displayAlertMessage = _this3.displayAlertMessage.bind(_this3);
-        _this3.displayWhisper = _this3.displayWhisper.bind(_this3);
-        _this3.handleSubmit = _this3.handleSubmit.bind(_this3);
+        };_this4.displayGeneralMessage = _this4.displayGeneralMessage.bind(_this4);
+        _this4.displayAlertMessage = _this4.displayAlertMessage.bind(_this4);
+        _this4.displayWhisper = _this4.displayWhisper.bind(_this4);
+        _this4.handleSubmit = _this4.handleSubmit.bind(_this4);
 
         //TODO : code displayGeneralMessage
-        io_socket.on('displayGeneralMessage', _this3.displayGeneralMessage);
-        io_socket.on('displayWhisper', _this3.displayWhisper);
-        io_socket.on('displayAlertMessage', _this3.displayAlertMessage);
-        return _this3;
+        io_socket.on('displayGeneralMessage', _this4.displayGeneralMessage);
+        io_socket.on('displayWhisper', _this4.displayWhisper);
+        io_socket.on('displayAlertMessage', _this4.displayAlertMessage);
+        return _this4;
     }
 
     _createClass(Chat, [{
-        key: 'displayGeneralMessage',
+        key: "scrollUpdate",
+        value: function scrollUpdate(id) {
+            var element = document.getElementById(id);
+            var topPos = element.offsetTop;
+            document.getElementById("chatLogGame").scrollTop = topPos;
+        }
+    }, {
+        key: "displayGeneralMessage",
         value: function displayGeneralMessage(data) {
+            var _this5 = this;
+
             /*data = {color: "", pseudo: ""} */
             this.setState(function (state) {
                 return { logs: state.logs.concat([React.createElement(
-                        'div',
-                        { key: state.logs.length },
+                        "div",
+                        { id: "messageLog" + _this5.state.logs.length, key: state.logs.length },
                         React.createElement(
-                            'span',
+                            "span",
                             { style: { fontWeight: "bold", color: data.color } },
                             data.pseudo + ':'
                         ),
                         ' ' + data.text
                     )]) };
             });
+
+            this.scrollUpdate("messageLog" + (this.state.logs.length - 1));
         }
     }, {
-        key: 'displayWhisper',
+        key: "displayWhisper",
         value: function displayWhisper(data) {
+            var _this6 = this;
+
             this.setState(function (state) {
                 return { logs: state.logs.concat([React.createElement(
-                        'div',
-                        { key: state.logs.length },
+                        "div",
+                        { id: "messageLog" + _this6.state.logs.length, key: state.logs.length },
                         React.createElement(
-                            'span',
+                            "span",
                             { style: { fontStyle: "italic" } },
                             data
                         )
                     )]) };
             });
+
+            this.scrollUpdate("messageLog" + (this.state.logs.length - 1));
         }
     }, {
-        key: 'displayAlertMessage',
+        key: "displayAlertMessage",
         value: function displayAlertMessage(data) {
+            var _this7 = this;
+
             this.setState(function (state) {
                 return { logs: state.logs.concat([React.createElement(
-                        'div',
-                        { key: state.logs.length },
+                        "div",
+                        { id: "messageLog" + _this7.state.logs.length, key: state.logs.length },
                         React.createElement(
-                            'span',
+                            "span",
                             { style: { color: "red" } },
                             data
                         )
                     )]) };
             });
+
+            this.scrollUpdate("messageLog" + (this.state.logs.length - 1));
         }
     }, {
-        key: 'handleSubmit',
+        key: "handleSubmit",
         value: function handleSubmit(event) {
 
             event.preventDefault();
@@ -258,20 +326,20 @@ var Chat = function (_React$Component2) {
             inputDiv.value = "";
         }
     }, {
-        key: 'render',
+        key: "render",
         value: function render() {
             return React.createElement(
-                'div',
-                { className: 'gameComponent', id: 'chatAreaGame' },
+                "div",
+                { className: "gameComponent", id: "chatAreaGame" },
                 React.createElement(
-                    'div',
-                    { className: 'chatLog', id: 'chatLogGame' },
+                    "div",
+                    { className: "chatLog", id: "chatLogGame" },
                     this.state.logs
                 ),
                 React.createElement(
-                    'form',
-                    { className: 'chatForm', id: 'chatFormGame', onSubmit: this.handleSubmit, autoComplete: 'off' },
-                    React.createElement('input', { className: 'chatInput', id: 'chatInputGame', type: 'text' })
+                    "form",
+                    { className: "chatForm", id: "chatFormGame", onSubmit: this.handleSubmit, autoComplete: "off" },
+                    React.createElement("input", { className: "chatInput", id: "chatInputGame", type: "text" })
                 )
             );
         }
@@ -280,36 +348,36 @@ var Chat = function (_React$Component2) {
     return Chat;
 }(React.Component);
 
-var Pist = function (_React$Component3) {
-    _inherits(Pist, _React$Component3);
+var Pist = function (_React$Component4) {
+    _inherits(Pist, _React$Component4);
 
     function Pist(props) {
         _classCallCheck(this, Pist);
 
-        var _this4 = _possibleConstructorReturn(this, (Pist.__proto__ || Object.getPrototypeOf(Pist)).call(this, props));
+        var _this8 = _possibleConstructorReturn(this, (Pist.__proto__ || Object.getPrototypeOf(Pist)).call(this, props));
 
-        _this4.state = {
+        _this8.state = {
             pawns: props.pawns, //just a list of colors
             sizePiste: props.sizePiste,
             dicePos: props.dicePos,
             diceValue: props.diceValue
         };
 
-        _this4.updatePawns = _this4.updatePawns.bind(_this4);
-        _this4.updateSizePiste = _this4.updateSizePiste.bind(_this4);
-        _this4.updateDice = _this4.updateDice.bind(_this4);
+        _this8.updatePawns = _this8.updatePawns.bind(_this8);
+        _this8.updateSizePiste = _this8.updateSizePiste.bind(_this8);
+        _this8.updateDice = _this8.updateDice.bind(_this8);
 
         // io binds
         io_socket.on('updatePiste', function (data) {
             this.updatePawns(data.pawns);
             this.updateSizePiste(data.size);
             this.updateDice(data.dice);
-        }.bind(_this4));
-        return _this4;
+        }.bind(_this8));
+        return _this8;
     }
 
     _createClass(Pist, [{
-        key: 'clearAllDiceCanvas',
+        key: "clearAllDiceCanvas",
         value: function clearAllDiceCanvas() {
             for (var i = 0; i < this.state.sizePiste; i++) {
                 var canvas = document.getElementById("canvasPisteDice" + i);
@@ -318,7 +386,7 @@ var Pist = function (_React$Component3) {
             }
         }
     }, {
-        key: 'colorPawns',
+        key: "colorPawns",
         value: function colorPawns() {
             this.state.pawns.forEach(function (colorPawn) {
                 var canvas = document.getElementById("canvasPistePawn" + colorPawn);
@@ -330,7 +398,7 @@ var Pist = function (_React$Component3) {
             });
         }
     }, {
-        key: 'colorDice',
+        key: "colorDice",
         value: function colorDice() {
             if (this.state.diceValue > 9) {
                 console.log("Warning : dice value overflow : " + this.state.diceValue);
@@ -339,20 +407,20 @@ var Pist = function (_React$Component3) {
             if (this.state.dicePos >= 0 && this.state.dicePos < this.state.sizePiste && this.state.diceValue) {
                 var canvas = document.getElementById("canvasPisteDice" + this.state.dicePos);
                 var ctx = canvas.getContext("2d");
-                ctx.font = "40px serif";
+                ctx.font = "40px Texturina";
                 ctx.fillStyle = "white";
                 ctx.textAlign = "center";
-                ctx.fillText(this.state.diceValue, canvas.width / 2, canvas.height * (3 / 4));
+                ctx.fillText(this.state.diceValue, canvas.width / 2, canvas.height * (2 / 3));
             }
         }
     }, {
-        key: 'updatePawns',
+        key: "updatePawns",
         value: function updatePawns(new_pawns) {
             this.setState({ pawns: new_pawns });
             this.colorPawns();
         }
     }, {
-        key: 'updateSizePiste',
+        key: "updateSizePiste",
         value: function updateSizePiste(new_size) {
             this.setState({ sizePiste: new_size });
             this.colorPawns();
@@ -360,39 +428,38 @@ var Pist = function (_React$Component3) {
             this.colorDice();
         }
     }, {
-        key: 'updateDice',
+        key: "updateDice",
         value: function updateDice(new_dice) {
             this.setState({ dicePos: new_dice.pos, diceValue: new_dice.val });
             this.clearAllDiceCanvas();
             this.colorDice();
         }
     }, {
-        key: 'componentDidMount',
+        key: "componentDidMount",
         value: function componentDidMount() {
             //we draw the pawns and the dice
             this.colorPawns();
 
-            //for now, we do it to avoid writing out of the canvas... maybe we can change it later
             this.colorDice();
         }
     }, {
-        key: 'render',
+        key: "render",
         value: function render() {
 
             var pawnsCanvas = this.state.pawns.map(function (pawnColor) {
-                return React.createElement('canvas', { key: "canvasPistePawn" + pawnColor, id: "canvasPistePawn" + pawnColor, width: 50, height: 50, style: { border: "2px solid white" } });
+                return React.createElement("canvas", { key: "canvasPistePawn" + pawnColor, id: "canvasPistePawn" + pawnColor, width: 50, height: 50, style: { border: "2px solid white" } });
             });
 
             var pisteCanvas = [];
             for (var i = 0; i < this.state.sizePiste; i++) {
-                pisteCanvas.push(React.createElement('canvas', { key: "canvasPisteDice" + i, id: "canvasPisteDice" + i, width: 50, height: 50, style: { border: "2px solid white" } }));
+                pisteCanvas.push(React.createElement("canvas", { key: "canvasPisteDice" + i, id: "canvasPisteDice" + i, width: 50, height: 50, style: { border: "2px solid white" } }));
             }
 
             return React.createElement(
-                'div',
-                { className: 'gameComponent', id: 'pisteCerbere' },
+                "div",
+                { className: "gameComponent", id: "pisteCerbere" },
                 pawnsCanvas,
-                ' ',
+                " ",
                 pisteCanvas
             );
         }
@@ -401,8 +468,8 @@ var Pist = function (_React$Component3) {
     return Pist;
 }(React.Component);
 
-var Deck = function (_React$Component4) {
-    _inherits(Deck, _React$Component4);
+var Deck = function (_React$Component5) {
+    _inherits(Deck, _React$Component5);
 
     /*
      * psg_cards et action_cards : normal card + idx for server
@@ -410,9 +477,9 @@ var Deck = function (_React$Component4) {
     function Deck(props) {
         _classCallCheck(this, Deck);
 
-        var _this5 = _possibleConstructorReturn(this, (Deck.__proto__ || Object.getPrototypeOf(Deck)).call(this, props));
+        var _this9 = _possibleConstructorReturn(this, (Deck.__proto__ || Object.getPrototypeOf(Deck)).call(this, props));
 
-        _this5.state = {
+        _this9.state = {
             psg_cards: props.psg_cards,
             action_cards: props.action_cards,
             psg_hoverable: false,
@@ -420,116 +487,142 @@ var Deck = function (_React$Component4) {
             show_skip: false
 
             //binds function
-        };_this5.updatePsgCards = _this5.updatePsgCards.bind(_this5);
-        _this5.updateActionCards = _this5.updateActionCards.bind(_this5);
-        _this5.updatePsgHoverable = _this5.updatePsgHoverable.bind(_this5);
-        _this5.updateActionHoverable = _this5.updateActionHoverable.bind(_this5);
-        _this5.updateSkipable = _this5.updateSkipable.bind(_this5);
+        };_this9.updatePsgCards = _this9.updatePsgCards.bind(_this9);
+        _this9.updateActionCards = _this9.updateActionCards.bind(_this9);
+        _this9.updatePsgHoverable = _this9.updatePsgHoverable.bind(_this9);
+        _this9.updateActionHoverable = _this9.updateActionHoverable.bind(_this9);
+        _this9.updateSkipable = _this9.updateSkipable.bind(_this9);
 
         //binds
-        io_socket.on('updatePsgCards', _this5.updatePsgCards);
-        io_socket.on("updateActionCards", _this5.updateActionCards);
-        io_socket.on('updatePsgHoverable', _this5.updatePsgHoverable);
-        io_socket.on('updateActionHoverable', _this5.updateActionHoverable);
-        io_socket.on('updateSkipable', _this5.updateSkipable);
-        return _this5;
+        io_socket.on('updatePsgCards', _this9.updatePsgCards);
+        io_socket.on("updateActionCards", _this9.updateActionCards);
+        io_socket.on('updatePsgHoverable', _this9.updatePsgHoverable);
+        io_socket.on('updateActionHoverable', _this9.updateActionHoverable);
+        io_socket.on('updateSkipable', _this9.updateSkipable);
+        return _this9;
     }
 
     _createClass(Deck, [{
-        key: 'updatePsgCards',
+        key: "drawCards",
+        value: function drawCards() {
+            this.state.psg_cards.forEach(function (psg) {
+                var listIdsCanvas = [];
+                var listEffects = [];
+                psg.forEach(function (effect) {
+                    listIdsCanvas.push("psgCardCanvasEffect" + effect.idx);
+                    listIdsCanvas.push("psgCardCanvasCost" + effect.idx);
+                    listEffects.push(effect.effect.targetEffects.concat(effect.effect.generalEffects));
+                    listEffects.push(effect.cost.targetEffects.concat(effect.cost.generalEffects));
+                });
+                drawListEffect(listIdsCanvas, listEffects);
+            });
+            this.state.action_cards.forEach(function (action) {
+                var listIdsCanvas = [];
+                var listEffects = [];
+                action.effects.forEach(function (effect) {
+                    listIdsCanvas.push("actionCardCanvasEffect" + effect.idx);
+                    listIdsCanvas.push("actionCardCanvasCost" + effect.idx);
+                    listEffects.push(effect.effect.targetEffects.concat(effect.effect.generalEffects));
+                    listEffects.push(effect.cost.targetEffects.concat(effect.cost.generalEffects));
+                });
+                drawListEffect(listIdsCanvas, listEffects);
+            });
+        }
+    }, {
+        key: "updatePsgCards",
         value: function updatePsgCards(new_psg_cards) {
             this.setState({ psg_cards: new_psg_cards });
+            this.drawCards();
         }
     }, {
-        key: 'updateActionCards',
+        key: "updateActionCards",
         value: function updateActionCards(new_action_cards) {
             this.setState({ action_cards: new_action_cards });
+            this.drawCards();
         }
     }, {
-        key: 'updatePsgHoverable',
+        key: "updatePsgHoverable",
         value: function updatePsgHoverable(new_val) {
-            console.log("update psg hoverable: " + new_val);
             this.setState({ psg_hoverable: new_val });
         }
     }, {
-        key: 'updateActionHoverable',
+        key: "updateActionHoverable",
         value: function updateActionHoverable(new_val) {
-            console.log("update action hoverable: " + new_val);
             this.setState({ action_hoverable: new_val });
         }
     }, {
-        key: 'updateSkipable',
+        key: "updateSkipable",
         value: function updateSkipable(new_val) {
             this.setState({ show_skip: new_val });
         }
     }, {
-        key: 'handleMouseEnterPsg',
+        key: "handleMouseEnterPsg",
         value: function handleMouseEnterPsg(id) {
             if (!this.state.psg_hoverable) return;
             var divCard = document.getElementById(id);
             if (divCard != undefined) divCard.style.border = "medium solid red";
         }
     }, {
-        key: 'handleMouseEnterAction',
+        key: "handleMouseEnterAction",
         value: function handleMouseEnterAction(id) {
             if (!this.state.action_hoverable) return;
             var divCard = document.getElementById(id);
             if (divCard != undefined) divCard.style.border = "medium solid red";
         }
     }, {
-        key: 'handleMouseLeavePsg',
+        key: "handleMouseLeavePsg",
         value: function handleMouseLeavePsg(id) {
             //if(!this.state.psg_hoverable) return;
             var divCard = document.getElementById(id);
             if (divCard != undefined) divCard.style.border = "";
         }
     }, {
-        key: 'handleMouseLeaveAction',
+        key: "handleMouseLeaveAction",
         value: function handleMouseLeaveAction(id) {
             //if(!this.state.action_hoverable) return;
             var divCard = document.getElementById(id);
             if (divCard != undefined) divCard.style.border = "";
         }
     }, {
-        key: 'handleClickPsg',
+        key: "handleClickPsg",
         value: function handleClickPsg(idx) {
             if (!this.state.psg_hoverable) return;
-            console.log('sending selectedPsgCard');
             io_socket.emit('selectedPsgCard', idx);
         }
     }, {
-        key: 'handleClickAction',
+        key: "handleClickAction",
         value: function handleClickAction(idx) {
             if (!this.state.action_hoverable) return;
             io_socket.emit('selectedActionCard', idx);
         }
     }, {
-        key: 'handleClickSkip',
+        key: "handleClickSkip",
         value: function handleClickSkip() {
             if (!this.state.show_skip) return;
             io_socket.emit('skipAction');
         }
     }, {
-        key: 'render',
+        key: "render",
         value: function render() {
-            var _this6 = this;
+            var _this10 = this;
 
             var divsPsg = this.state.psg_cards.map(function (psg_card) {
                 return React.createElement(
-                    'div',
-                    { className: 'card', id: "cardPsg" + psg_card[0].idx, key: "cardPsg" + psg_card[0].idx },
+                    "div",
+                    { className: "psgCard", id: "cardPsg" + psg_card[0].idx, key: "cardPsg" + psg_card[0].idx },
                     psg_card.map(function (effect) {
                         return React.createElement(
-                            'div',
-                            { className: 'effect', id: "cardPsgEffect" + effect.idx, key: "cardPsgEffect" + effect.idx, onClick: function onClick() {
-                                    return _this6.handleClickPsg(effect.idx);
+                            "div",
+                            { className: "effect", id: "cardPsgEffect" + effect.idx, key: "cardPsgEffect" + effect.idx, onClick: function onClick() {
+                                    return _this10.handleClickPsg(effect.idx);
                                 },
                                 onMouseEnter: function onMouseEnter() {
-                                    return _this6.handleMouseEnterPsg("cardPsgEffect" + effect.idx);
+                                    return _this10.handleMouseEnterPsg("cardPsgEffect" + effect.idx);
                                 }, onMouseLeave: function onMouseLeave() {
-                                    return _this6.handleMouseLeavePsg("cardPsgEffect" + effect.idx);
+                                    return _this10.handleMouseLeavePsg("cardPsgEffect" + effect.idx);
                                 } },
-                            effect.idx
+                            React.createElement("canvas", { id: "psgCardCanvasEffect" + effect.idx }),
+                            React.createElement("canvas", { id: "psgCardCanvasCost" + effect.idx })
                         );
                     })
                 );
@@ -537,41 +630,46 @@ var Deck = function (_React$Component4) {
 
             var divsAct = this.state.action_cards.map(function (act_card) {
                 return React.createElement(
-                    'div',
-                    { className: 'card', id: "cardAct" + act_card.effects[0].idx, key: "cardAct" + act_card.effects[0].idx },
-                    act_card.name,
+                    "div",
+                    { className: "actionCard", id: "cardAct" + act_card.effects[0].idx, key: "cardAct" + act_card.effects[0].idx },
+                    React.createElement(
+                        "span",
+                        { className: "actionName" },
+                        act_card.name
+                    ),
                     act_card.effects.map(function (effect) {
                         return React.createElement(
-                            'div',
-                            { className: 'effect', id: "cardActEffect" + effect.idx, key: "cardPsgEffect" + effect.idx, onClick: function onClick() {
-                                    return _this6.handleClickAction(effect.idx);
+                            "div",
+                            { className: "effect", id: "cardActEffect" + effect.idx, key: "cardPsgEffect" + effect.idx, onClick: function onClick() {
+                                    return _this10.handleClickAction(effect.idx);
                                 },
                                 onMouseEnter: function onMouseEnter() {
-                                    return _this6.handleMouseEnterAction("cardActEffect" + effect.idx);
+                                    return _this10.handleMouseEnterAction("cardActEffect" + effect.idx);
                                 }, onMouseLeave: function onMouseLeave() {
-                                    return _this6.handleMouseLeaveAction("cardActEffect" + effect.idx);
+                                    return _this10.handleMouseLeaveAction("cardActEffect" + effect.idx);
                                 } },
-                            effect.idx
+                            React.createElement("canvas", { id: "actionCardCanvasEffect" + effect.idx }),
+                            React.createElement("canvas", { id: "actionCardCanvasCost" + effect.idx })
                         );
                     })
                 );
             });
 
             var buttonDiv = this.state.show_skip ? React.createElement(
-                'div',
-                { id: 'skipButtonDiv' },
+                "div",
+                { id: "skipButtonDiv" },
                 React.createElement(
-                    'button',
-                    { id: 'skipbutton', type: 'button', onClick: function onClick() {
-                            return _this6.handleClickSkip();
+                    "button",
+                    { className: "button", id: "skipbutton", type: "button", onClick: function onClick() {
+                            return _this10.handleClickSkip();
                         } },
-                    'skip action'
+                    "Sauter l'action"
                 )
-            ) : React.createElement('div', { id: 'skipButtonDiv' });
+            ) : React.createElement("div", { id: "skipButtonDiv" });
 
             return React.createElement(
-                'div',
-                { className: 'gameComponent', id: 'deck' },
+                "div",
+                { className: "gameComponent", id: "deck" },
                 divsPsg,
                 divsAct,
                 buttonDiv
@@ -582,15 +680,15 @@ var Deck = function (_React$Component4) {
     return Deck;
 }(React.Component);
 
-var Barks = function (_React$Component5) {
-    _inherits(Barks, _React$Component5);
+var Barks = function (_React$Component6) {
+    _inherits(Barks, _React$Component6);
 
     function Barks(props) {
         _classCallCheck(this, Barks);
 
-        var _this7 = _possibleConstructorReturn(this, (Barks.__proto__ || Object.getPrototypeOf(Barks)).call(this, props));
+        var _this11 = _possibleConstructorReturn(this, (Barks.__proto__ || Object.getPrototypeOf(Barks)).call(this, props));
 
-        _this7.state = {
+        _this11.state = {
             unveiled: false,
             barksData: 3,
             hoverableBarks: [],
@@ -598,103 +696,103 @@ var Barks = function (_React$Component5) {
             showTransposeButton: false
 
             //======= bindings
-        };_this7.updateBarksData = _this7.updateBarksData.bind(_this7);
-        _this7.updateSeeButton = _this7.updateSeeButton.bind(_this7);
-        _this7.updateTransposeButton = _this7.updateTransposeButton.bind(_this7);
-        _this7.updateHoverableBarks = _this7.updateHoverableBarks.bind(_this7);
+        };_this11.updateBarksData = _this11.updateBarksData.bind(_this11);
+        _this11.updateSeeButton = _this11.updateSeeButton.bind(_this11);
+        _this11.updateTransposeButton = _this11.updateTransposeButton.bind(_this11);
+        _this11.updateHoverableBarks = _this11.updateHoverableBarks.bind(_this11);
 
-        io_socket.on('updateBarks', _this7.updateBarksData);
-        io_socket.on('updateSeeButton', _this7.updateSeeButton);
-        io_socket.on('updateTransposeButton', _this7.updateTransposeButton);
-        io_socket.on('updateHoverableBarks', _this7.updateHoverableBarks);
-        return _this7;
+        io_socket.on('updateBarks', _this11.updateBarksData);
+        io_socket.on('updateSeeButton', _this11.updateSeeButton);
+        io_socket.on('updateTransposeButton', _this11.updateTransposeButton);
+        io_socket.on('updateHoverableBarks', _this11.updateHoverableBarks);
+        return _this11;
     }
 
     _createClass(Barks, [{
-        key: 'updateBarksData',
+        key: "updateBarksData",
         value: function updateBarksData(val) {
             this.setState({ unveiled: val.unveiled, barksData: val.data });
         }
     }, {
-        key: 'updateSeeButton',
+        key: "updateSeeButton",
         value: function updateSeeButton(val) {
             this.setState({ showSeeButton: val });
         }
     }, {
-        key: 'updateTransposeButton',
+        key: "updateTransposeButton",
         value: function updateTransposeButton(val) {
             this.setState({ showTransposeButton: val });
         }
     }, {
-        key: 'updateHoverableBarks',
+        key: "updateHoverableBarks",
         value: function updateHoverableBarks(barks) {
             this.setState({ hoverableBarks: barks });
         }
     }, {
-        key: 'handleMouseEnter',
+        key: "handleMouseEnter",
         value: function handleMouseEnter(number) {
             if (!this.state.hoverableBarks.includes(number)) return;
             var divBark = document.getElementById("barkDiv" + number);
             divBark.style.border = "medium solid green";
         }
     }, {
-        key: 'handleMouseLeave',
+        key: "handleMouseLeave",
         value: function handleMouseLeave(number) {
             //if(!(this.state.hoverableBarks.includes(number))) return;
             var divBark = document.getElementById("barkDiv" + number);
             divBark.style.border = "";
         }
     }, {
-        key: 'handleClickBark',
+        key: "handleClickBark",
         value: function handleClickBark(number) {
             if (!this.state.hoverableBarks.includes(number)) return;
             io_socket.emit("selectedBark", number);
         }
     }, {
-        key: 'handleClickShow',
+        key: "handleClickShow",
         value: function handleClickShow() {
             if (!this.state.showSeeButton) return;
             io_socket.emit("clickSeeBark");
         }
     }, {
-        key: 'handleClickTranspose',
+        key: "handleClickTranspose",
         value: function handleClickTranspose() {
             if (!this.state.showTransposeButton) return;
             io_socket.emit("clickTransposeBark");
         }
     }, {
-        key: 'render',
+        key: "render",
         value: function render() {
-            var _this9 = this;
+            var _this13 = this;
 
             var barksDiv = this.state.unveiled ? [React.createElement(
-                'div',
-                { id: 'barkDiv0', key: 'barkDiv0' },
+                "div",
+                { id: "barkDiv0", key: "barkDiv0" },
                 React.createElement(
-                    'span',
-                    { className: 'roomBark' },
-                    'Places : ',
+                    "span",
+                    { className: "roomBark" },
+                    "Places : ",
                     this.state.barksData
                 )
             )] : function () {
-                var _this8 = this;
+                var _this12 = this;
 
                 var res = [];
 
                 var _loop = function _loop(i) {
                     res.push(React.createElement(
-                        'div',
+                        "div",
                         { id: "barkDiv" + i, key: "barkDiv" + i, onMouseEnter: function onMouseEnter() {
-                                return _this8.handleMouseEnter(i);
+                                return _this12.handleMouseEnter(i);
                             }, onMouseLeave: function onMouseLeave() {
-                                return _this8.handleMouseLeave(i);
+                                return _this12.handleMouseLeave(i);
                             }, onClick: function onClick() {
-                                return _this8.handleClickBark(i);
+                                return _this12.handleClickBark(i);
                             } },
                         React.createElement(
-                            'span',
-                            { className: 'barkUnknown' },
-                            "Bark " + (i + 1)
+                            "span",
+                            { className: "barkUnknown" },
+                            "Barque " + (i + 1)
                         )
                     ));
                 };
@@ -706,38 +804,38 @@ var Barks = function (_React$Component5) {
             }.bind(this)();
 
             return React.createElement(
-                'div',
-                { id: 'barkArea', className: 'gameComponent' },
+                "div",
+                { id: "barkArea", className: "gameComponent" },
                 React.createElement(
-                    'div',
-                    { id: 'barksList' },
+                    "div",
+                    { id: "barksList" },
                     barksDiv
                 ),
                 React.createElement(
-                    'div',
-                    { id: 'barkButtons' },
+                    "div",
+                    { id: "barkButtons" },
                     this.state.showSeeButton ? React.createElement(
-                        'div',
-                        { id: 'barkShowButton' },
+                        "div",
+                        { id: "barkShowButton" },
                         React.createElement(
-                            'button',
-                            { type: 'button', onClick: function onClick() {
-                                    return _this9.handleClickShow();
+                            "button",
+                            { className: "button", type: "button", onClick: function onClick() {
+                                    return _this13.handleClickShow();
                                 } },
-                            'Show'
+                            "Voir"
                         )
-                    ) : React.createElement('div', { id: 'barkShowButton' }),
+                    ) : React.createElement("div", { id: "barkShowButton" }),
                     this.state.showTransposeButton ? React.createElement(
-                        'div',
-                        { id: 'barkTransposeButton' },
+                        "div",
+                        { id: "barkTransposeButton" },
                         React.createElement(
-                            'button',
-                            { type: 'button', onClick: function onClick() {
-                                    return _this9.handleClickTranspose();
+                            "button",
+                            { className: "button", type: "button", onClick: function onClick() {
+                                    return _this13.handleClickTranspose();
                                 } },
-                            'Transpose'
+                            "Echanger"
                         )
-                    ) : React.createElement('div', { id: 'barkTransposeButton' })
+                    ) : React.createElement("div", { id: "barkTransposeButton" })
                 )
             );
         }
@@ -746,51 +844,136 @@ var Barks = function (_React$Component5) {
     return Barks;
 }(React.Component);
 
-var MapCells = function (_React$Component6) {
-    _inherits(MapCells, _React$Component6);
+var MapCells = function (_React$Component7) {
+    _inherits(MapCells, _React$Component7);
 
     /*
         cells: {
             players: [colors],
+            cerbere
             TODO : effets, pilotis, portails, etc
         }
+        pilotis : [idx],
+        bridges: [{
+            connectedCells: [idx],
+            intact: bool
+        }]
+        portals; [{
+            connectedCells: [idx],
+            activator: idx
+        }]
     */
     function MapCells(props) {
         _classCallCheck(this, MapCells);
 
-        var _this10 = _possibleConstructorReturn(this, (MapCells.__proto__ || Object.getPrototypeOf(MapCells)).call(this, props));
+        var _this14 = _possibleConstructorReturn(this, (MapCells.__proto__ || Object.getPrototypeOf(MapCells)).call(this, props));
 
-        _this10.state = {
+        _this14.state = {
             cells: [],
             pos_cerbere: -1,
-            highlighted: []
+            highlighted: [],
+
+            unveil: 0,
+            pilotis: [],
+            bridges: [],
+            portals: [],
+
+            specificsCanvas: []
         };
 
         //===== bindings
-        _this10.updateData = _this10.updateData.bind(_this10);
-        _this10.updateHighlighted = _this10.updateHighlighted.bind(_this10);
+        _this14.updateData = _this14.updateData.bind(_this14);
+        _this14.updateHighlighted = _this14.updateHighlighted.bind(_this14);
 
-        io_socket.on('updateMap', _this10.updateData);
-        io_socket.on('updateMapHighlighted', _this10.updateHighlighted);
-        return _this10;
+        io_socket.on('updateMap', _this14.updateData);
+        io_socket.on('updateMapHighlighted', _this14.updateHighlighted);
+        return _this14;
     }
 
     _createClass(MapCells, [{
-        key: 'updateData',
-        value: function updateData(new_data) {
-            this.setState({ cells: new_data.cells, pos_cerbere: new_data.pos_cerbere });
+        key: "pilotisToCanvasId",
+        value: function pilotisToCanvasId(idx_cell) {
+            return "canvasIdPiloti" + idx_cell;
         }
     }, {
-        key: 'handleMouseClick',
+        key: "unveilToCanvasId",
+        value: function unveilToCanvasId(idx_cell) {
+            return "canvasIdUnveil" + idx_cell;
+        }
+    }, {
+        key: "bridgeToCanvasId",
+        value: function bridgeToCanvasId(idx_bridge, idx_cell) {
+            return "canvasIdBridge" + idx_bridge + "cell" + idx_cell;
+        }
+    }, {
+        key: "activatorToCanvasId",
+        value: function activatorToCanvasId(idx_portal) {
+            return "canvasIdActivator" + idx_portal;
+        }
+    }, {
+        key: "portalToCanvasId",
+        value: function portalToCanvasId(idx_portal, idx_cell) {
+            return "canvasIdPortal" + idx_portal + "cell" + idx_cell;
+        }
+    }, {
+        key: "drawBorders",
+        value: function drawBorders() {
+            this.state.cells.forEach(function (cell, idx) {
+                if (cell.cerbere) {
+                    document.getElementById("cellBorder" + idx).style.border = "thin solid white";
+                } else {
+                    document.getElementById("cellBorder" + idx).style.border = "thin solid #aba0bd";
+                }
+            });
+        }
+    }, {
+        key: "updateData",
+        value: function updateData(new_data) {
+            this.setState({ cells: new_data.cells, pos_cerbere: new_data.pos_cerbere, unveil: new_data.unveil,
+                pilotis: new_data.pilotis, bridges: new_data.bridges, portals: new_data.portals });
+
+            var newSpecifics = [];
+            for (var i = 0; i < new_data.cells.length; i++) {
+                newSpecifics.push(this.getCellSpecificsCanvas(i, new_data.unveil, new_data.portals, new_data.bridges, new_data.pilotis));
+            }
+            this.setState({ specificsCanvas: newSpecifics });
+
+            this.drawBorders();
+            this.drawSpecifics();
+        }
+    }, {
+        key: "drawSpecifics",
+        value: function drawSpecifics() {
+            //unveil
+            drawMapSpecifics(this.unveilToCanvasId(this.state.unveil), "unveil");
+            this.state.pilotis.forEach(function (idxPiloti) {
+                drawMapSpecifics(this.pilotisToCanvasId(idxPiloti), "piloti");
+            }.bind(this));
+            this.state.bridges.forEach(function (bridge, idxBridge) {
+                if (bridge.intact) {
+                    bridge.connectedCells.forEach(function (idxCell) {
+                        drawMapSpecifics(this.bridgeToCanvasId(idxBridge, idxCell), "bridge");
+                    });
+                }
+            }.bind(this));
+            this.state.portals.forEach(function (portal, idxPortal) {
+                portal.connectedCells.forEach(function (idxCell) {
+                    drawMapSpecifics(this.portalToCanvasId(idxPortal, idxCell), "portal");
+                });
+                drawMapSpecifics(this.activatorToCanvasId(idxPortal), "activator");
+            }.bind(this));
+        }
+    }, {
+        key: "handleMouseClick",
         value: function handleMouseClick(cellNumber) {
             if (!this.state.highlighted.includes(cellNumber)) return;
             io_socket.emit('selectedMapCell', cellNumber);
         }
     }, {
-        key: 'colorHightlighted',
+        key: "colorHightlighted",
         value: function colorHightlighted() {
             for (var i = 0; i < this.state.cells.length; i++) {
-                var divCell = document.getElementById("cellDiv" + i);
+                var divCell = document.getElementById("cellContainer" + i);
                 if (divCell == undefined) continue;
                 if (this.state.highlighted.includes(i)) {
                     divCell.style.border = "medium solid green";
@@ -800,38 +983,100 @@ var MapCells = function (_React$Component6) {
             }
         }
     }, {
-        key: 'updateHighlighted',
+        key: "updateHighlighted",
         value: function updateHighlighted(new_highlighted) {
             this.setState({ highlighted: new_highlighted });
             this.colorHightlighted();
         }
     }, {
-        key: 'componentDidMount',
+        key: "componentDidMount",
         value: function componentDidMount() {
             this.colorHightlighted();
         }
     }, {
-        key: 'render',
+        key: "getCellSpecificsCanvas",
+        value: function getCellSpecificsCanvas(idxCell, unveil, portals, bridges, pilotis) {
+            var res = [];
+            if (unveil == idxCell) {
+                var canvasid = this.unveilToCanvasId(idxCell);
+                res.push(React.createElement(
+                    "div",
+                    { id: "div" + canvasid, key: "div" + canvasid, className: "canvasSpecifics" },
+                    React.createElement("canvas", { id: canvasid, key: canvasid })
+                ));
+            }
+            if (pilotis.includes(idxCell)) {
+                var _canvasid = this.pilotisToCanvasId(idxCell);
+                res.push(React.createElement(
+                    "div",
+                    { id: "div" + _canvasid, key: "div" + _canvasid, className: "canvasSpecifics" },
+                    React.createElement("canvas", { id: _canvasid, key: _canvasid })
+                ));
+            }
+            bridges.forEach(function (bridge, bridgeIdx) {
+                if (bridge.intact && bridge.connectedCells.includes(idxCell)) {
+                    var _canvasid2 = this.bridgeToCanvasId(bridgeIdx, idxCell);
+                    res.push(React.createElement(
+                        "div",
+                        { id: "div" + _canvasid2, key: "div" + _canvasid2, className: "canvasSpecifics" },
+                        React.createElement("canvas", { id: _canvasid2, key: _canvasid2 })
+                    ));
+                }
+            });
+            portals.forEach(function (portal, portalIdx) {
+                if (portal.activator == idxCell) {
+                    var _canvasid3 = this.activatorToCanvasId(portalIdx);
+                    res.push(React.createElement(
+                        "div",
+                        { id: "div" + _canvasid3, key: "div" + _canvasid3, className: "canvasSpecifics" },
+                        React.createElement("canvas", { id: _canvasid3, key: _canvasid3 })
+                    ));
+                }
+                if (portal.connectedCells.includes(idxCell)) {
+                    var _canvasid4 = this.portalToCanvasId(portalIdx, idxCell);
+                    res.push(React.createElement(
+                        "div",
+                        { id: "div" + _canvasid4, key: "div" + _canvasid4, className: "canvasSpecifics" },
+                        React.createElement("canvas", { id: _canvasid4, key: _canvasid4 })
+                    ));
+                }
+            });
+            return res;
+        }
+    }, {
+        key: "render",
         value: function render() {
 
             var cellDivs = this.state.cells.map(function (cell, index) {
-                var _this11 = this;
+                var _this15 = this;
 
-                // TODO : améliorer ça, franchement !
                 return React.createElement(
-                    'div',
-                    { id: "cellDiv" + index, key: "cellDiv" + index, className: 'mapCell',
+                    "div",
+                    { id: "cellContainer" + index, key: "cellContainer" + index, className: "mapCellContainer",
                         onClick: function onClick() {
-                            return _this11.handleMouseClick(index);
+                            return _this15.handleMouseClick(index);
                         } },
-                    cell.players,
-                    this.state.pos_cerbere == index ? "CERBERE" : ""
+                    React.createElement(
+                        "div",
+                        { id: "cellBorder" + index, className: "mapCellStateBorder" },
+                        React.createElement(
+                            "div",
+                            { id: "cellDiv" + index, key: "cellDiv" + index, className: "mapCell" },
+                            cell.players,
+                            this.state.pos_cerbere == index ? "CERBERE" : ""
+                        ),
+                        React.createElement(
+                            "div",
+                            { id: "cellSpecifics" + index, key: "cellSpecifics" + index, className: "mapCell" },
+                            this.state.specificsCanvas[index]
+                        )
+                    )
                 );
             }.bind(this));
 
             return React.createElement(
-                'div',
-                { id: 'gameMap', className: 'gameComponent' },
+                "div",
+                { id: "gameMap", className: "gameComponent" },
                 cellDivs
             );
         }
@@ -840,130 +1085,136 @@ var MapCells = function (_React$Component6) {
     return MapCells;
 }(React.Component);
 
-var PendingEffects = function (_React$Component7) {
-    _inherits(PendingEffects, _React$Component7);
+var PendingEffects = function (_React$Component8) {
+    _inherits(PendingEffects, _React$Component8);
 
     function PendingEffects(props) {
         _classCallCheck(this, PendingEffects);
 
-        var _this12 = _possibleConstructorReturn(this, (PendingEffects.__proto__ || Object.getPrototypeOf(PendingEffects)).call(this, props));
+        var _this16 = _possibleConstructorReturn(this, (PendingEffects.__proto__ || Object.getPrototypeOf(PendingEffects)).call(this, props));
 
-        _this12.state = {
+        _this16.state = {
             listEffects: { targetEffects: [], generalEffects: [] },
             cancelActive: false,
             hoverable: false
         };
 
-        _this12.updateListEffects = _this12.updateListEffects.bind(_this12);
-        _this12.updateCancelActive = _this12.updateCancelActive.bind(_this12);
-        _this12.updateHoverable = _this12.updateHoverable.bind(_this12);
+        _this16.updateListEffects = _this16.updateListEffects.bind(_this16);
+        _this16.updateCancelActive = _this16.updateCancelActive.bind(_this16);
+        _this16.updateHoverable = _this16.updateHoverable.bind(_this16);
 
-        io_socket.on('updatePendingEffects', _this12.updateListEffects);
-        io_socket.on('updateCancelActive', _this12.updateCancelActive);
-        io_socket.on('updateHoverablePendingEffects', _this12.updateHoverable);
-        return _this12;
+        io_socket.on('updatePendingEffects', _this16.updateListEffects);
+        io_socket.on('updateCancelActive', _this16.updateCancelActive);
+        io_socket.on('updateHoverablePendingEffects', _this16.updateHoverable);
+        return _this16;
     }
 
     _createClass(PendingEffects, [{
-        key: 'updateListEffects',
+        key: "updateListEffects",
         value: function updateListEffects(new_list) {
             this.setState({ listEffects: new_list });
+            this.state.listEffects.targetEffects.forEach(function (subeffect, idx) {
+                drawSubEffect("pendingEffectTargetCanvas" + idx, subeffect);
+            });
+            this.state.listEffects.generalEffects.forEach(function (subeffect, idx) {
+                drawSubEffect("pendingEffectGeneralCanvas" + idx, subeffect);
+            });
         }
     }, {
-        key: 'updateCancelActive',
+        key: "updateCancelActive",
         value: function updateCancelActive(new_val) {
             this.setState({ cancelActive: new_val });
         }
     }, {
-        key: 'updateHoverable',
+        key: "updateHoverable",
         value: function updateHoverable(new_val) {
             this.setState({ hoverable: new_val });
         }
     }, {
-        key: 'handleMouseEnter',
+        key: "handleMouseEnter",
         value: function handleMouseEnter(target, idx) {
             if (!this.state.hoverable) return;
             var effectDiv = document.getElementById('pending' + (target ? 'Target' : 'General') + 'Effect' + idx);
             effectDiv.style.border = "medium solid red";
         }
     }, {
-        key: 'handleMouseLeave',
+        key: "handleMouseLeave",
         value: function handleMouseLeave(target, idx) {
             //if(!this.state.hoverable) return;
             var effectDiv = document.getElementById('pending' + (target ? 'Target' : 'General') + 'Effect' + idx);
             effectDiv.style.border = "";
         }
     }, {
-        key: 'handleEffectClick',
+        key: "handleEffectClick",
         value: function handleEffectClick(target, idx) {
             if (!this.state.hoverable) return;
             io_socket.emit('selectedPendingEffect', { targeted: target, idx: idx });
         }
     }, {
-        key: 'handleCancelClick',
+        key: "handleCancelClick",
         value: function handleCancelClick() {
             if (!this.state.cancelActive) return;
             io_socket.emit('cancelActiveEffect');
         }
     }, {
-        key: 'render',
+        key: "render",
         value: function render() {
-            var _this15 = this;
+            var _this19 = this;
 
-            var listTargetEffectsDiv = this.state.listEffects.targetEffects.map(function (effect, idx) {
-                var _this13 = this;
+            var listTargetEffectsDiv = this.state.listEffects.targetEffects.map(function (subEffect, idx) {
+                var _this17 = this;
 
                 return React.createElement(
-                    'div',
+                    "div",
                     { key: "pendingTargetEffect" + idx, id: "pendingTargetEffect" + idx, onMouseEnter: function onMouseEnter() {
-                            return _this13.handleMouseEnter(true, idx);
+                            return _this17.handleMouseEnter(true, idx);
                         }, onMouseLeave: function onMouseLeave() {
-                            return _this13.handleMouseLeave(true, idx);
+                            return _this17.handleMouseLeave(true, idx);
                         },
                         onClick: function onClick() {
-                            return _this13.handleEffectClick(true, idx);
-                        }, className: 'pendingEffect' },
-                    "Targeted " + idx
+                            return _this17.handleEffectClick(true, idx);
+                        }, className: "pendingEffect" },
+                    React.createElement("canvas", { id: "pendingEffectTargetCanvas" + idx })
                 );
             }.bind(this));
 
             var listGeneralEffectsDiv = this.state.listEffects.generalEffects.map(function (effect, idx) {
-                var _this14 = this;
+                var _this18 = this;
 
                 return React.createElement(
-                    'div',
+                    "div",
                     { key: "pendingGeneralEffect" + idx, id: "pendingGeneralEffect" + idx, onMouseEnter: function onMouseEnter() {
-                            return _this14.handleMouseEnter(false, idx);
+                            return _this18.handleMouseEnter(false, idx);
                         }, onMouseLeave: function onMouseLeave() {
-                            return _this14.handleMouseLeave(false, idx);
+                            return _this18.handleMouseLeave(false, idx);
                         },
                         onClick: function onClick() {
-                            return _this14.handleEffectClick(false, idx);
-                        }, className: 'pendingEffect' },
-                    "General " + idx
+                            return _this18.handleEffectClick(false, idx);
+                        }, className: "pendingEffect" },
+                    React.createElement("canvas", { id: "pendingEffectGeneralCanvas" + idx })
                 );
             }.bind(this));
 
             return React.createElement(
-                'div',
-                { className: 'gameComponent', id: 'pendingEffects' },
+                "div",
+                { className: "gameComponent", id: "pendingEffects" },
                 React.createElement(
-                    'div',
-                    { id: 'pendginEffectsList' },
+                    "div",
+                    { id: "pendginEffectsList" },
                     listTargetEffectsDiv,
                     listGeneralEffectsDiv
                 ),
                 this.state.cancelActive ? React.createElement(
-                    'div',
-                    { id: 'cancelButtonPendingEffects' },
+                    "div",
+                    { id: "cancelButtonPendingEffects" },
                     React.createElement(
-                        'button',
-                        { type: 'button', onClick: function onClick() {
-                                return _this15.handleCancelClick();
+                        "button",
+                        { className: "button", type: "button", onClick: function onClick() {
+                                return _this19.handleCancelClick();
                             } },
-                        'Annuler'
+                        "Annuler"
                     )
-                ) : React.createElement('div', { id: 'cancelButtonPendingEffects' })
+                ) : React.createElement("div", { id: "cancelButtonPendingEffects" })
             );
         }
     }]);
@@ -975,15 +1226,16 @@ function playGame() {
 
     //The React render should be here ultimately
     ReactDOM.render(React.createElement(
-        'div',
-        { id: 'runningGame' },
+        "div",
+        { id: "runningGame" },
         React.createElement(
-            'div',
-            { className: 'columnLeft', id: 'gameLeft' },
+            "div",
+            { className: "columnLeft", id: "gameLeft" },
+            React.createElement(Banner, null),
             React.createElement(Pist, { pawns: ["cyan", "green"], sizePiste: 5, dicePos: 2, diceValue: 4 }),
             React.createElement(
-                'div',
-                { id: 'boardArea' },
+                "div",
+                { id: "boardArea" },
                 React.createElement(MapCells, null),
                 React.createElement(Barks, null)
             ),
@@ -991,8 +1243,8 @@ function playGame() {
             React.createElement(PendingEffects, null)
         ),
         React.createElement(
-            'div',
-            { className: 'columnRight', id: 'gameRight' },
+            "div",
+            { className: "columnRight", id: "gameRight" },
             React.createElement(ListJoueurs, { joueurs: [{ couleur: "white", pseudo: "" }] }),
             React.createElement(Chat, null)
         )

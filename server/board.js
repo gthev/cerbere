@@ -91,11 +91,9 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
         pos_cerbere: -1, // Antre de Cerbère
 
         competitors: [],
-        decks: Decks,
     }   
 
     self.map = Map.genNewMap();
-    Decks.initDecks();
 
     if(self.map == undefined) return undefined;
 
@@ -235,7 +233,10 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
             console.log("Warning : playerDrawCard player neither alive nor cerbere tries to draw");
             return;
         }
-
+        if(new_card == undefined) {
+            console.log("TODO : handle draw when empty deck");
+            return;
+        }
         compet.action_cards.push(new_card);
     }
 
@@ -281,7 +282,7 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
 
     // argument : active_player_idx is the idx of the active_player
     self.targetToListOfPlayers = function(active_player_idx, target) {
-        let activeCompet = self.competitors[active_player_idx];
+        //let activeCompet = self.competitors[active_player_idx];
         let res = [];
         switch (target) {
             case "self":
@@ -542,15 +543,21 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
         let step = (number>0)? 1 : -1;
         let numberabs = (number>0)? number : -number;
         for(let i=0; i<numberabs; i++) {
-            if(self.pos_cerbere < self.map.cells.length - 1 && self.pos_cerbere > 0) self.pos_cerbere += step;
+            if((!(step > 0 && self.pos_cerbere >= self.map.cells.length - 1)) && !(step < 0 && self.pos_cerbere <= 0)) self.pos_cerbere += step;
             //check for players on this cell
-            let playersOnCell = self.getPlayersByPos[self.pos_cerbere];
+            let playersOnCell = self.getPlayersByPos(self.pos_cerbere);
             if(playersOnCell.length > 0) {
+
+                //we capture them
+                Utils.shuffle(playersOnCell);
+                playersOnCell.forEach(function(captured){
+                    self.capturePlayer(captured);
+                });
                 //we back cerbere to the last point
-                self.pos_cerbere--;
-                while(!self.map.cells[self.pos_cerbere].cerbere && self.pos_cerbere > 0) self.pos_cerbere--;
+                if(self.pos_cerbere > 0) self.pos_cerbere--;
+                while(self.pos_cerbere > 0 && !self.map.cells[self.pos_cerbere].cerbere) self.pos_cerbere--;
                 // we reset the dice
-                self.dice.resetDice();
+                self.piste.resetDice();
                 // I think we stop cerbere here
                 break;
             }
@@ -565,8 +572,22 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
             
             self.piste.reduceSlopeSize();
 
-            if(self.numberPlayersAlive() > number_non_cerberable_players)
+            if(self.numberPlayersAlive() > number_non_cerberable_players) {
                 compet.status = "cerbere";
+                compet.hero_cards = Decks.createCerbereDeck();
+                //we discard its remaining survival cards
+                compet.action_cards.forEach(function(survival){
+                    Decks.discardSurvivalCard(survival);
+                });
+                compet.action_cards.length = 0;
+                // and we add treason cards
+                for(let i=0; i<self.map.cells[compet.position].treason; i++) {
+                    let treason_card = Decks.drawTreasonCard();
+                    if(treason_card != undefined) {
+                        compet.action_cards.push(treason_card);
+                    }
+                }
+            }
             else
                 compet.status = "dead";
         }
@@ -587,7 +608,8 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
             let capturedPlayers = self.getPlayersByPos(self.pos_cerbere);
             if(capturedPlayers.length > 0) {
                 captured = true;
-                // TODO : we could capture them in a chosen order ! Or at least, random, to be fair
+
+                Utils.shuffle(capturedPlayers);
                 capturedPlayers.forEach(function(capturedPlayer){
                     self.capturePlayer(capturedPlayer);
                 });
@@ -597,14 +619,14 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
         }
 
         if(captured) {
-            //we step back of at least one cell
-            self.pos_cerbere--;
-            while(!self.map.cells[self.pos_cerbere].cerbere && self.pos_cerbere > 0) self.pos_cerbere--;
+            //we step back of at least one cell (if we're not on the first cell)
+            if(self.pos_cerbere > 0) self.pos_cerbere--;
+            while(self.pos_cerbere > 0 && !self.map.cells[self.pos_cerbere].cerbere) self.pos_cerbere--;
             // we reset the dice
-            self.dice.resetDice();
+            self.piste.resetDice();
         } else {
             //we augment the dice (if possible)
-            self.dice.augmentDice();
+            self.piste.augmentDice();
         }
     }
 
@@ -635,10 +657,12 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
             let compets_here = self.getPlayersByPos(index);
             return({
                 players: compets_here.map((compet) => (compet.pion.name)),
+                cerbere: cell.cerbere,
             });
         });
 
-        self.emitToAll('updateMap', {cells: cells, pos_cerbere: self.pos_cerbere});
+        self.emitToAll('updateMap', {cells: cells, pos_cerbere: self.pos_cerbere, unveil: self.map.unveil, pilotis: self.map.pilotis,
+                                        portals: self.map.portals, bridges: self.map.bridges});
     }
 
     self.updatePendingEffects = function(active_compet, pendingEffects) {
@@ -672,7 +696,7 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
         self.competitors.forEach(function(compet){
             if(compet != undefined) {
                 sockets.push(compet.socket);
-                players_to_send.push({couleur: compet.pion.name, pseudo: compet.pseudo});
+                players_to_send.push({couleur: compet.pion.name, pseudo: compet.pseudo, state: compet.status});
             }
         });
 
@@ -695,14 +719,12 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
        *  END OF UPDATE
        */
 
-    // *********************************
-    // *        handle of copy         *
-    // *********************************
-
-    self.getCopy
-
     return self;
 }
+
+// *********************************
+// *        handle of copy         *
+// *********************************
 
 var getCopyCompet = function(compet) {
     var new_compet = {
@@ -719,18 +741,9 @@ var getCopyCompet = function(compet) {
 }
 
 // can't be used as it
-/*
-id: player.id,
-            socket: socket_list[player.id],
-            pseudo : player.pseudo,
-            pion: player.pion,
-            status: "alive",
-            action_cards: [],
-            // Here : initialization of action decks
-            hero_cards : Decks.createAdventurerDeck(),
-            position: self.map.start,
-*/
+
 var getCopyBoard = function(board) {
+
     var new_board = Board(board.init_props.addCellsPiste, board.init_props.players, board.init_props.socket_list, board.init_props.number_non_cerberable_players);
     
     new_board.map = Map.copyMap(board.map);
@@ -742,9 +755,10 @@ var getCopyBoard = function(board) {
     new_board.pos_cerbere = board.pos_cerbere;
 
     new_board.competitors = board.competitors.map((compet) => (getCopyCompet(compet)));
-    new_board.decks = Decks;
 
     new_board.copiedDeck = Decks.getCopyState();
+
+    
 
     return new_board;
 }

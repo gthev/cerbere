@@ -88,7 +88,7 @@ const interm_tiles = [
                 treason: 0,
             },
             {
-                cebere: true,
+                cerbere: true,
                 effect: emptyEffect(),
                 treason: 0,
             },
@@ -107,12 +107,12 @@ const interm_tiles = [
     {
         cells: [
             {
-                cebere: true,
+                cerbere: true,
                 effect: emptyEffect(),
                 treason: 0,
             },
             {
-                cebere: false,
+                cerbere: false,
                 effect: emptyEffect(),
                 treason: 0,
             },

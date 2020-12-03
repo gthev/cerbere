@@ -4,17 +4,12 @@ body {
 }
 
 .gameComponent {
-    border: medium solid orchid;
+    border: medium solid #e08e41;
     border-radius: 25px;
     margin: 0 auto;
     margin-bottom: 10px;
     padding: 20px;
     cursor: default;
-}
-
-#listPlayers {
-    color: white;
-    padding: 20px;
 }
 
 .chatArea {
@@ -25,9 +20,10 @@ body {
     height: 400px;
     overflow-y: scroll;
     color: white;
+    margin: 5px;
 }
 
-.chatArea .chatInput {
+.chatInput {
     width: 95%;
     cursor: text;
 }
@@ -53,18 +49,100 @@ body {
   =========================
 */
 
-#deck {
+#listPlayers {
+    color: white;
+    padding: 20px;
+}
+
+.pseudoListElement {
+}
+
+.pseudoList {
+    font-family: 'Piazzolla', serif;
+    width: 70%;
+    float: right;
+    margin-top: 1em;
+}
+
+.pseudoListalive {
+    color: #19f0ff;
+}
+
+.pseudoListcerbere {
+    color: #edb31f;
+}
+
+.pseudoListdead {
+    color: #eb1717;
+}
+
+/*
+===========================
+BARKS
+*/
+#barkArea {
     display: flex;
 }
 
-.card {
+#barksList {
+    font-family: 'Cinzel', serif;
+    text-shadow: 1px 1px 2px indianred;
+    flex: 1;
+}
+
+#barkButtons {
+    flex: 1;
+}
+
+.button {
+    transition-duration: 0.3s;
+    background-color: white;
+    border: 2px solid lightsalmon;
+    text-align: center;
+    cursor: pointer;
+    color: black;
+    text-shadow: 1px 1px 2px indianred;
+    font-size: 14px;
+    padding: 4px 2px;
+    margin: 4px;
+    font-family: 'Cinzel', serif;
+}
+
+.button:hover {
+    background-color: lightsalmon;
+    color: white;
+}
+
+
+/*
+============================
+DECK
+*/
+
+#deck {
+    display: flex;
+    flex-wrap: wrap;
+    width: 95%;
+}
+
+.psgCard {
     width: 8em;
-    border: thin solid blueviolet;
+    border: medium solid blueviolet;
     margin: 3px;
 }
 
+.actionCard {
+    width: 8em;
+    border: medium solid goldenrod;
+    margin: 3px;
+}
+
+.actionName {
+    font-family: 'Cinzel', serif;
+}
+
 .effect {
-    border: thin solid greenyellow;
+    border: medium solid greenyellow;
     margin: 1px;
 }
 
@@ -78,9 +156,26 @@ MAP
     flex-direction: row;
 }
 
-.mapCell {
-    border: thin solid white;
+.mapCellContainer {
     flex: 0 0 80px;
-    height: 40px;
     margin: 20px;
+}
+
+.mapCell {
+    height: 40px;
+}
+
+/*
+============================
+BANNER
+*/
+
+.bannerDiv {
+    text-align: center;
+    height: 3em;
+}
+
+.banner {
+    font-family: 'Cinzel', serif;
+    text-shadow: 2px 2px 2px indianred;
 }

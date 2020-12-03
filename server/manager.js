@@ -14,8 +14,9 @@ var validMessagesWrtStatus = {
     "clickSeeBark": ["waitingBarksActionChoose"],
     "clickTransposeBark": ["waitingBarksActionChoose"],
     "selectedBark": ["waitingSelectedSeeBark", "waitingSelectedTransposeBark1", "waitingSelectedTransposeBark2"],
-    "cancelActiveEffect": ["waitingDiscardCost", "waitingPendingEffect", "waitingPendingCost"],
+    "cancelActiveEffect": ["waitingDiscardCost", "waitingPendingEffect", "waitingPendingCost", "waitingSelectedPlayer", "waitingSelectedMapCell"],
 }
+
 var isEffectEmpty = function(effect) {
     return (effect.targetEffects.length + effect.generalEffects.length == 0);
 }
@@ -104,9 +105,12 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         self.board.emitToAll("updatePendingEffects", emptyEffect());
 
         if(self.status == "waitingPsgChoose") {
+            self.updateBanner("Sélectionner une carte personnage.");
             self.board.competitors[self.activePlayer].socket.emit('updatePsgHoverable', true);
         } else if (self.status == "waitingActionChoose") {
+            self.updateBanner("Sélectionner une carte action.");
             self.board.competitors[self.activePlayer].socket.emit('updateActionHoverable', true);
+            self.board.competitors[self.activePlayer].socket.emit('updateSkipable', true);
         } else {
             console.log("restore with suspiscious status");
         }
@@ -125,6 +129,8 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     //================= CHAT FUNCTIONS ==================
     //===================================================
 
+    self.getSocket = function(competIdx) {return self.board.competitors[competIdx].socket;}
+
     self.alertPlayer = function(competIdx, message) {
         if(self.board.competitors[competIdx] != undefined) {
             self.board.competitors[competIdx].socket.emit('displayAlertMessage', message);
@@ -137,6 +143,12 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         self.board.competitors.forEach(function(compet, competIdx){
             self.alertPlayer(competIdx, message);
         });
+    }
+
+    self.updateBanner = function(competIdx, message) {
+        if(self.board.competitors[competIdx] != undefined) {
+            self.getSocket(competIdx).emit("updateBannerText", message);
+        }
     }
 
     //===================================================
@@ -188,10 +200,35 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     //===============================================
 
     self.changeStateSelectPlayer = function() {
-        self.alertPlayer(self.activePlayer, "Merci de sélectionner un joueur à qui appliquer l'effet dans la liste.");
+        //self.alertPlayer(self.activePlayer, "Merci de sélectionner un joueur à qui appliquer l'effet dans la liste.");
+        self.updateBanner(self.activePlayer, "Sélectionner un joueur à qui appliquer l'effet")
         self.reinitHoverable();
         self.changeStatus('waitingSelectedPlayer');
         self.board.competitors[self.activePlayer].socket.emit('updateListPlayersHoverable', true);
+        self.board.competitors[self.activePlayer].socket.emit('updateCancelActive', true);
+    }
+
+    self.nextPlayer = function() {
+        self.board.competitors[self.activePlayer].socket.emit('updatePendingEffects', { targetEffects: [], generalEffects: [] });
+        self.changeStatus("waitingPsgChoose");
+        self.activePlayer = (self.activePlayer + 1) % (self.board.competitors.length);
+        let counter = 0;
+        while(self.board.competitors[self.activePlayer].status == "dead") {
+            self.activePlayer = (self.activePlayer + 1) % (self.board.competitors.length);
+            counter++;
+            if(counter >= self.board.competitors.length) {
+                console.log("Warning: aucun joueur en mesure de jouer ?")
+                return;
+            }
+        }
+        //self.alertPlayer(self.activePlayer, "A vous de jouer !");
+        self.board.competitors.forEach(function(compet, competIdx){
+            if(compet != undefined) {
+                self.updateBanner(competIdx, self.board.competitors[self.activePlayer].pseudo+" est en train de jouer.")
+            }
+        });
+        self.updateBanner(self.activePlayer, "A vous de jouer ! Sélectionner une carte personnage.");
+        self.board.competitors[self.activePlayer].socket.emit("updatePsgHoverable", true);
     }
 
     //===============================================
@@ -200,6 +237,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     self.triggersPendingEffect = function() {
         console.log("triggers pending effect");
         self.reinitHoverable();
+        self.updateBanner(self.activePlayer, "Sélectionner un effet à appliquer.")
         self.changeStatus("waitingPendingEffect");
         let competActive = self.board.competitors[self.activePlayer];
         competActive.socket.emit('updatePendingEffects', self.pending_effects);
@@ -222,6 +260,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     //===============================================
     //assumed for active player
     self.handleNewEffect = function(effect) {
+
         old_status = self.status;
         //TODO : handle check cost effect
         self.pending_costs = Utils.copyEffect(effect.cost);
@@ -258,7 +297,8 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                 return;
             }
 
-            self.alertPlayer(self.activePlayer, "Vous devez payer "+self.effectAddLeft+" cartes action pour jouer cet effet.");
+            //self.alertPlayer(self.activePlayer, "Vous devez payer "+self.effectAddLeft+" cartes action pour jouer cet effet.");
+            self.updateBanner(self.activePlayer, "Vous devez payer "+self.effectAddLeft+" "+((self.effectAddLeft > 1)? "cartes" : "carte")+" action pour jouer cet effet.");
             self.board.competitors[self.activePlayer].socket.emit("updateCancelActive", true);
 
             //we update the hoverable properties
@@ -334,8 +374,10 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                 self.reinitHoverable();
                 self.changeStatus("waitingSelectedMapCell");
                 console.log("highlighted : "+mapCellsPotential);
-                self.alertPlayer(self.activePlayer, "Sélectionnez la case où aller.");
+                //self.alertPlayer(self.activePlayer, "Sélectionnez la case où aller.");
+                self.updateBanner(self.activePlayer, "Sélectionnez la case où aller.");
                 self.board.competitors[self.activePlayer].socket.emit('updateMapHighlighted', mapCellsPotential);
+                self.board.competitors[self.activePlayer].socket.emit('updateCancelActive', true);
                 break;
         
             default:
@@ -350,13 +392,21 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     //============ WHEN A SUBEFFECT IS FINISHED ===========
     //=====================================================
     self.handleSubEffectDone = function() {
+
+        self.reinitHoverable();
+        self.updateComponents();
+
+        if(self.board.competitors[self.activePlayer].status == "dead") {
+            self.nextPlayer();
+            return;
+        }
+
         /*
          check the turn, and if empty, continue as expected
          */
 
         // but first, we reinitialize all hoverable
-        self.reinitHoverable();
-        self.updateComponents();
+        
         
          //TODO : check if the state is right ? maybe ?
         if(isEffectEmpty(self.pending_effects)) {
@@ -368,16 +418,13 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
 
                     self.board.competitors[self.activePlayer].socket.emit('updatePendingEffects', {targetEffects: [], generalEffects: []});
                     self.changeStatus("waitingActionChoose");
+                    self.updateBanner(self.activePlayer, "Sélectionner une carte action.");
                     self.board.competitors[self.activePlayer].socket.emit("updateActionHoverable", true);
                     self.board.competitors[self.activePlayer].socket.emit("updateSkipable", true); 
 
                 } else if (self.turnPosition == 2) {
 
-                    self.board.competitors[self.activePlayer].socket.emit('updatePendingEffects', {targetEffects: [], generalEffects: []});
-                    self.changeStatus("waitingPsgChoose");
-                    self.activePlayer = (self.activePlayer+1) % (self.board.competitors.length);
-                    self.alertPlayer(self.activePlayer, "A vous de jouer !");
-                    self.board.competitors[self.activePlayer].socket.emit("updatePsgHoverable", true);
+                    self.nextPlayer();
 
                 } else {
                     console.log("Warning : handleSubEffectDone with turn position : "+self.turnPosition);
@@ -405,14 +452,14 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         if(self.board.competitors[competIdx] == undefined) return;
         if(competIdx != self.activePlayer) return;
 
-        console.log("Selected Psg Card !");
-
         // we search for the selected effet
         let compet = self.board.competitors[competIdx];
         let selectedEffect = compet.hero_cards.findAvailableEffectByIdx(idxCard);
 
         //if we didn't find it
         if(selectedEffect == undefined) return;
+
+        self.updateBanner(self.activePlayer, "");
 
         // we save the state before changing anything
         self.saveState();
@@ -444,6 +491,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
 
                 if(self.effectAddLeft <= 0) {
                     //we deactive the action hoverable to every one
+                    self.updateBanner(self.activePlayer, "");
                     self.board.emitToAll('updateActionHoverable', false);
                     self.triggersPendingEffect();
                 }
@@ -464,6 +512,8 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
 
                 // we also save the state
                 self.saveState();
+
+                self.updateBanner(self.activePlayer, "");
 
                 self.turnPosition = 2;
                 self.board.emitToAll('updateActionHoverable', false);
@@ -518,17 +568,45 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                         case "draw treason":
                             self.effectAddLeft = self.current_subeffect.addData;
 
-                            // we want the player to select someone
+                            
                             if(self.current_subeffect.target == "self") {
                                 //we go directly to effect application
-
+                                self.updateBanner(self.activePlayer, "");
                                 self.whenTargetSelected(competIdx, self.current_subeffect.effect);
 
+                            } else if (self.current_subeffect.target == "all other adventurers") { 
+                                
+                                //we want to apply the effect to all adventurers... that's what we accept for now
+                                let theEffect = self.current_subeffect.effect;
+                                if(theEffect == "step forward" || theEffect == "step back") {
+
+                                    let listCompet = self.board.targetToListOfPlayers("all other adventurers");
+                                    listCompet.forEach(function(targetIdx){
+                                        for(let i=0; i<self.current_subeffect.addData; i++) {
+                                            let potentialCells = self.board.checkPossibleNextCells(self.board.competitors[targetIdx], (theEffect == "step forward")? "forward" : "back");
+                                            if(potentialCells.length > 0) {
+                                                self.board.applyEffect(self.activePlayer, theEffect, true, {targetIdx: targetIdx, cellNumber: potentialCells[0]});
+                                            } else {
+                                                break;
+                                            }
+                                        }
+                                    });
+                                    self.reinitHoverable();
+                                    self.updateBanner(self.activePlayer, "");
+                                    self.handleSubEffectDone();
+
+                                } else {
+                                    console.log("selectedPendingEffect: unknown effect associated with all other adventurers : "+theEffect);
+                                    return;
+                                }
+                                
+
                             } else if(self.current_subeffect.target == "cerbere"){
-                                // TODO :handle : only step forward/back ! 
 
                                 let theEffect = self.current_subeffect.effect;
                                 if(theEffect == "step forward" || theEffect == "step back") {
+
+                                    self.updateBanner(self.activePlayer, "");
                                     let numberSteps = self.current_subeffect.addData;
                                     if(theEffect == "step back") numberSteps *= -1;
                                     self.board.applyEffect(self.active_player, theEffect, true, {targetIdx: -1, cellNumber: numberSteps});
@@ -537,13 +615,16 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                                     console.log("selectedPendingEffect: unknown effect associated with cerbere : "+theEffect);
                                     return;
                                 }
-
+                            
+                            // we want the player to select someone
                             } else {
+                                self.updateBanner(self.activePlayer, "");
                                 self.changeStateSelectPlayer();
                             }
                             break;
                     
                         case "discard":
+                            // TODO : in fact, carte "sabotage"...
                             console.log(" selectedPendingEffect : discard not handled, shouldn't happen actually, I think (at least for now)");
                             //sorry for wat im about todo
                             poiuytreza = 1; // so that the server crashes... TODO : change it later
@@ -570,6 +651,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                         case "hunt":
                         case "collect actions":
                             self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, undefined);
+                            self.updateBanner(self.activePlayer, "");
                             self.handleSubEffectDone();
                             break;
 
@@ -582,6 +664,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                                 self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, undefined);
                                 self.effectAddLeft--;
                             }
+                            self.updateBanner(self.activePlayer, "");
                             self.handleSubEffectDone();
                             break;
 
@@ -591,6 +674,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                                 self.alertPlayer(self.activePlayer, "Les barques sont déjà révélées");
                                 break;
                             }
+                            self.updateBanner(self.activePlayer, "");
                             break;
 
                         default:
@@ -627,12 +711,15 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                     console.log("Warning : waitingSelectedPlayer but no current subeffect");
                     return;
                 }
+                
                 // let's go
                 let candidates = self.board.targetToListOfPlayers(self.activePlayer, self.current_subeffect.target);
                 if(!candidates.includes(selectedIdx)) {
                     self.alertPlayer(competIdx, "Vous ne pouvez pas sélectionner ce joueur. Recommencez plz.");
                     return;
                 }
+
+                self.updateBanner(self.activePlayer, "");
 
                 self.whenTargetSelected(selectedIdx, self.current_subeffect.effect);
 
@@ -661,6 +748,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         if(self.effectAddLeft > 0) {
             self.whenTargetSelected(targetIdx, self.current_subeffect.effect);
         } else {
+            self.updateBanner(self.activePlayer, "");
             self.handleSubEffectDone();
         }
 
@@ -676,6 +764,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         self.pending_effects = emptyEffect();
         self.pending_costs = emptyEffect();
         self.turnPosition = 2;
+        self.updateBanner(self.activePlayer, "");
         self.handleSubEffectDone();
     });
 
@@ -683,7 +772,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         if(!self.checkCorrectStatus('cancelActiveEffect')) return;
         if(self.board.competitors[competIdx] == undefined) return;
         if(competIdx != self.activePlayer) return;
-
+        self.updateBanner(self.activePlayer, "");
         self.restoreSave();
     });
 
@@ -698,9 +787,12 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         let compet = self.board.competitors[competIdx];
         if(compet == undefined) return;
 
+        self.updateBanner(self.activePlayer, "");
+
         self.reinitHoverable();
         compet.socket.emit("updateHoverableBarks", Utils.rangeArray(self.board.barks.length));
-        self.alertPlayer(self.activePlayer, "Merci de sélectionner la barque à dévoiler.");
+        //self.alertPlayer(self.activePlayer, "Merci de sélectionner la barque à dévoiler.");
+        self.updateBanner(self.activePlayer, "Merci de sélectionner la barque à dévoiler.");
         self.changeStatus("waitingSelectedSeeBark");
     });
 
@@ -712,9 +804,12 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         let compet = self.board.competitors[competIdx];
         if(compet == undefined) return;
 
+        self.updateBanner(self.activePlayer, "");
+
         self.reinitHoverable();
         compet.socket.emit("updateHoverableBarks", Utils.rangeArray(self.board.barks.length));
-        self.alertPlayer(self.activePlayer, "Merci de sélectionner les barques à échanger.");
+        //self.alertPlayer(self.activePlayer, "Merci de sélectionner les barques à échanger.");
+        self.updateBanner(self.activePlayer, "Merci de sélectionner la barque à échanger.");
         self.changeStatus("waitingSelectedTransposeBark1");
     });
 
@@ -734,6 +829,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         switch (self.status) {
             case "waitingSelectedSeeBark":
                 self.reinitHoverable();
+                self.updateBanner(self.activePlayer, "");
                 let barkRoom = self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, {barkEffect: "see", barkValue: numberBark});
                 self.alertPlayer(self.activePlayer, "La barque sélectionnée a "+barkRoom+" "+((barkRoom > 1)? "places" : "place"));
                 self.handleSubEffectDone();
@@ -750,8 +846,10 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                 }
                 barksLeft.splice(idxToRemove, 1);
                 self.reinitHoverable();
+                self.updateBanner(self.activePlayer, "");
                 compet.socket.emit("updateHoverableBarks", barksLeft);
-                self.alertPlayer(self.activePlayer, "Sélectionnez-en une seconde.");
+                //self.alertPlayer(self.activePlayer, "Sélectionnez-en une seconde.");
+                self.updateBanner(self.activePlayer, "Sélectionnez-en une seconde.");
                 self.changeStatus("waitingSelectedTransposeBark2");
                 break;
 
@@ -759,9 +857,10 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                 self.bark_already_selected.push(numberBark);
                 
                 self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, {barkEffect: "transpose", barkValue: self.bark_already_selected});
-                self.alertAllPlayers("Les barques "+self.bark_already_selected[0]+" et "+self.bark_already_selected[1]+" ont été échangées.");
+                self.alertAllPlayers("Les barques "+(self.bark_already_selected[0]+1)+" et "+(self.bark_already_selected[1]+1)+" ont été échangées.");
 
                 self.bark_already_selected = [];
+                self.updateBanner(self.activePlayer, "");
                 self.handleSubEffectDone();
                 break;
         
@@ -776,10 +875,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     // we choose the first player at random
     self.activePlayer = Math.floor( Math.random() * players.length );
 
-    // FOR DEBUG PURPOSE
-    self.board.playerDrawActionCard(self.activePlayer);
-    self.board.playerDrawActionCard(self.activePlayer);
-    self.board.playerDrawActionCard(self.activePlayer);
+    
     //init :
 
     //=============================
@@ -791,6 +887,12 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     self.board.competitors.forEach(function(compet){self.board.updateDeckCards(compet)});
 
     self.board.competitors[self.activePlayer].socket.emit('updatePsgHoverable', true);
+    self.board.competitors.forEach(function(compet, competIdx){
+        if(compet != undefined) {
+            self.updateBanner(competIdx, self.board.competitors[self.activePlayer].pseudo+" est en train de jouer.")
+        }
+    });
+    self.updateBanner(self.activePlayer, "A vous de jouer ! Sélectionner une carte personnage.");
 
     return self;
 };
