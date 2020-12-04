@@ -91,6 +91,9 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
         pos_cerbere: -1, // Antre de Cerbère
 
         competitors: [],
+
+        // must unveil at the end of the turn
+        must_unveil: false,
     }   
 
     self.map = Map.genNewMap();
@@ -124,12 +127,22 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
         return res;
     }
 
+    self.playersIdxAlive = function() {
+        var res = [];
+        self.competitors.forEach(function(compet, idx){
+            if(compet != undefined && compet.status == "alive") {
+                res.push(idx);
+            }
+        });
+        return res;
+    }
+
     self.piste = Piste.newPiste(self.list_pions.length + addCellsPiste, self.deadOutPions().length);
 
     //we shuffle the barks
     Utils.shuffle(self.barks);
 
-    /* returns an array of competitors ids on a cell*/
+    /* returns an array of competitors on a cell*/
     self.getPlayersByPos = function(pos) {
         if(pos < 0 || pos >= this.map.cells.length) return [];
         var res = [];
@@ -171,7 +184,9 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
            - it is on the board (or it is the bark)
            - if it is on a piloti, then there's no player on it
         */
-        if(pos < self.map.cells.length && direction == "forward" && !(self.map.pilotis.includes(pos + 1) && self.getPlayersByPos(pos+1).length > 0)) {
+        if(pos < self.map.cells.length && direction == "forward" 
+                && !(self.map.pilotis.includes(pos + 1) && self.getPlayersByPos(pos+1).length > 0)
+                && /* if last cell, check who's here */ !(pos+1 == self.map.cells.length - 1  && self.getPlayersByPos(pos+1).length + 1 <= self.barks[0])) {
             res.push(pos+1);
         }
         if(pos > 0 && direction == "back" && !(self.map.pilotis.includes(pos - 1) && self.getPlayersByPos(pos-1).length > 0)) {
@@ -484,19 +499,59 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
         }
     }
 
+    self.shouldUnveil = function() {
+        return self.must_unveil;
+    }
+
+    self.unveilBarks = function() {
+        if(!self.unveiled) {
+            // handle unveil !
+            self.barks_unveiled = true;
+            let roomBark = self.barks[0]
+            self.barks = [roomBark];
+            if(self.playersIdxAlive().length < roomBark) {
+                // Game over !
+                var winners = [];
+                var losers = [];
+                self.competitors.forEach(function(compet, idx){
+                    if(compet != undefined) {
+                        if(compet.status == "cerbere") winners.push(idx);
+                        else losers.push(idx);
+                    }
+                });
+                throw {win: winners, lose: losers};
+            }
+        }
+
+        self.must_unveil = false;
+    }
+
     // this function should be called when a players triggers a cell
     self.handleCellSpecifics = function(oldPosition, cellNumber) {
         //handle unveil
         if(self.map.unveil == cellNumber) {
-            if(!self.unveiled) {
-                self.barks_unveiled = true;
-                self.barks = [self.barks[0]];
-            }
+            self.must_unveil = true;
         }
         for(let i=0; i<self.map.bridges.length; i++) {
             let bridge = self.map.bridges[i];
             if(bridge.connectedCells.includes(oldPosition) && bridge.connectedCells.includes(cellNumber)) {
                 bridge.intact = false;
+            }
+        }
+
+        //handle if last cell
+        if(cellNumber == self.map.cells.length - 1) {
+            if(self.getPlayersByPos(cellNumber).length == self.barks[0]) {
+                // Game over ! adventurers win
+                var winners = [];
+                var losers = [];
+                self.competitors.forEach(function(compet, idx){
+                    if(compet != undefined) {
+                        if(compet.statis == "alive" && compet.pos == cellNumber) winners.push(idx);
+                        else losers.push(idx);
+                    }
+                });
+                throw {win: winners, lose: losers};
             }
         }
     }
@@ -590,6 +645,20 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
             }
             else
                 compet.status = "dead";
+        }
+
+        // we check for alive left
+        if(self.playersIdxAlive().length == 0 || (self.barks_unveiled && self.playersIdxAlive().length < self.barks[0])) {
+            // Game over !
+            var winners = [];
+            var losers = [];
+            self.competitors.forEach(function(compet, idx){
+                if(compet != undefined) {
+                    if(compet.status == "cerbere") winners.push(idx);
+                    else losers.push(idx);
+                }
+            });
+            throw {win: winners, lose: losers};
         }
     }
 
@@ -718,6 +787,9 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
        * ===============
        *  END OF UPDATE
        */
+
+    // DEBUG THINGS
+    //self.map.unveil = 3;
 
     return self;
 }

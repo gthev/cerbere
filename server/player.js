@@ -18,16 +18,16 @@ var colors = [
         rgb: "(255,255,255)"
     },
     {
-        name: "cyan",
-        rgb: "(0,255,255)"
+        name: "turquoise",
+        rgb: "(64,224,208)"
     },
     {
-        name: "navy",
-        rgb: "(0,0,128)"
+        name: "indigo",
+        rgb: "(75,0,130)"
     },
     {
-        name: "lightgreen",
-        rgb: "(144,238,144)"
+        name: "lawngreen",
+        rgb: "(124,252,0)"
     },
     {
         name: "hotpink",

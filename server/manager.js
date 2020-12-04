@@ -41,9 +41,11 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         turnPosition: 0,
         pending_effects: undefined,
         pending_costs: undefined,
-        // TODO : handle cancel, /!\ restore deck ?
-        // this sould be a complete and deep copy of the board (compets, piste,...) + DECKS
+        
         save_cancel : undefined,
+
+        //patch exploits. todo at the end of the effect
+        buffer_alert : [],
     }
 
     self.checkCorrectStatus = function(message) {
@@ -120,7 +122,21 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     self.bindAllCompets = function(message, reaction) {
         self.board.competitors.forEach(function(compet, competIdx){
             if(compet != undefined) {
-                compet.socket.on(message, ((data) => reaction(data, competIdx)));
+                compet.socket.on(message, (function(data) { 
+                    try {
+                        reaction(data, competIdx) 
+                    } catch (results) {
+                        self.changeStatus("gameOver");
+                        self.updateComponents();
+                        self.reinitHoverable();
+                        results.win.forEach(function(playIdx){
+                            self.updateBanner(playIdx, "Bravo ! Vous avez gagné !");
+                        });
+                        results.lose.forEach(function(playIdx){
+                            self.updateBanner(playIdx, "Mdr le nullos, il a perdu ! N00bz");
+                        });
+                    }
+                }));
             }
         });
     };
@@ -198,6 +214,18 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     //===============================================
     //========== HANDLE CHANGES OF STATE ============
     //===============================================
+
+    self.addTurnBuffer = function(message) {
+        self.buffer_alert.push(message);
+    }
+
+    self.flushAtEndEffect = function() {
+        self.buffer_alert.forEach((message) => (self.alertPlayer(self.activePlayer, message)));
+        while(self.buffer_alert.length > 0) self.buffer_alert.pop();
+        if(self.board.shouldUnveil()) {
+            self.board.unveilBarks();
+        }
+    }
 
     self.changeStateSelectPlayer = function() {
         //self.alertPlayer(self.activePlayer, "Merci de sélectionner un joueur à qui appliquer l'effet dans la liste.");
@@ -416,6 +444,9 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                // if we were at turn 1, we go at turn 2 and pending effect, else the turn is finished
                 if(self.turnPosition == 1) {
 
+                    // send alerts that have to be sent to the players
+                    self.flushAtEndEffect();
+
                     self.board.competitors[self.activePlayer].socket.emit('updatePendingEffects', {targetEffects: [], generalEffects: []});
                     self.changeStatus("waitingActionChoose");
                     self.updateBanner(self.activePlayer, "Sélectionner une carte action.");
@@ -424,6 +455,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
 
                 } else if (self.turnPosition == 2) {
 
+                    self.flushAtEndEffect();
                     self.nextPlayer();
 
                 } else {
@@ -831,7 +863,8 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                 self.reinitHoverable();
                 self.updateBanner(self.activePlayer, "");
                 let barkRoom = self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, {barkEffect: "see", barkValue: numberBark});
-                self.alertPlayer(self.activePlayer, "La barque sélectionnée a "+barkRoom+" "+((barkRoom > 1)? "places" : "place"));
+                self.addTurnBuffer("La barque sélectionnée a "+barkRoom+" "+((barkRoom > 1)? "places" : "place"));
+                self.alertPlayer(self.activePlayer, "Vous verrez la barque sélectionnée à la fin du tour.");
                 self.handleSubEffectDone();
                 break;
 
