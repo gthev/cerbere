@@ -11,7 +11,7 @@ var Game = require('./server/manager');
 //************
 //*   DEBUG  *
 //************
-let DEBUG = true;
+let DEBUG = false;
 let passwd = (DEBUG) ? "pample" : utils.gen_passwd();
 
 // *********************
@@ -123,14 +123,41 @@ io.sockets.on('connection', function(socket){
                 }
             });
 
-            
+            SOCK_IDS.push(socket.id);
+            SOCKET_LIST[socket.id] = socket;            
 
             PLAYERS[socket.id] = player;
+            socket.emit('enterPrep', (SOCK_IDS.length == 1));
 
-            socket.emit('enterPrep', {});
+            chatInit(socket);
+
         } else {
             console.log("Invalid password");
             socket.emit('invalidLog', "Mot de passe invalide.");
+        }
+    });
+
+
+    // ************************************
+    // *          GAME START              *
+    // ************************************
+
+    var numberPlayers = function() {
+        let count = 0;
+        SOCK_IDS.forEach(function(id){
+            if(PLAYERS[id] != undefined) count++;
+        });
+        return count;
+    }
+
+    socket.on('askBeginGame', function() {
+        if(socket.id == SOCK_IDS[0] && numberPlayers() >= 3) {
+            SOCK_IDS.forEach(function(id){
+                if(PLAYERS[id] != undefined) {
+                    SOCKET_LIST[id].emit('beginGame');
+                }
+            });
+            GameManager = Game.newGame(2, SOCK_IDS.map((id) => (PLAYERS[id])), SOCKET_LIST, 2);
         }
     });
 

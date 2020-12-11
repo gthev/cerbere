@@ -3,6 +3,75 @@ body {
     color: white;
 }
 
+/*
+=================================
+
+Login and Prep Room
+
+*/
+
+#frontTitle {
+    margin: auto;
+    font-family: 'Cinzel', serif;
+    text-align: center;
+}
+
+#loginForm {
+    margin: auto;
+    text-align: center;
+    font-family: 'Piazzolla', serif;
+    font-size: larger;
+}
+
+.loginInput {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    background-color: black;
+    border: 2px solid whitesmoke;
+    border-radius: 4px;
+    color: white;
+    box-sizing: border-box;
+    outline: none;
+    font-size: large;
+    font-family: 'Piazzolla', serif;
+}
+
+.loginInput:focus {
+    background-color: black;
+    border: 2px solid indianred;
+    border-radius: 4px;
+    color: white;
+    box-sizing: border-box;
+    outline: none
+}
+
+#invalidPasswd {
+    margin: auto;
+    text-align: center;
+}
+
+#loginButton {
+    font-size: x-large;
+    margin: 10px;
+}
+
+h1 {
+    text-shadow: 2px 2px 2px indianred;
+    font-size: 40px;
+}
+
+#chatAreaPrep {
+    border: medium solid #e08e41;
+    border-radius: 25px;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    padding: 20px;
+}
+
+/*
+================================
+*/
+
 .gameComponent {
     border: medium solid #e08e41;
     border-radius: 25px;
@@ -45,8 +114,18 @@ body {
     width: 20%;
 }
 
+.columnLeftEqual {
+    float: left;
+    width: 45%;
+}
+
+.columnRightEqual {
+    float: right;
+    width: 45%;
+}
+
 /*=========================
-  =========================
+    LIST OF PLAYERS
 */
 
 #listPlayers {
@@ -74,6 +153,15 @@ body {
 
 .pseudoListdead {
     color: #eb1717;
+}
+
+/*
+===========================
+PENDING EFFECTS
+*/
+
+.pendingEffect {
+    width: 50%;
 }
 
 /*
@@ -154,6 +242,8 @@ MAP
     overflow-x: scroll;
     display: flex;
     flex-direction: row;
+    scrollbar-color: rebeccapurple yellow;
+    scrollbar-width: thin;
 }
 
 .mapCellContainer {
@@ -162,7 +252,12 @@ MAP
 }
 
 .mapCell {
-    height: 40px;
+    min-height: 40px;
+}
+
+.pawnMapDiv {
+    display: inline-block;
+    margin: 3px;
 }
 
 /*
@@ -172,10 +267,15 @@ BANNER
 
 .bannerDiv {
     text-align: center;
-    height: 3em;
+    height: 6em;
 }
 
 .banner {
+    font-family: 'Cinzel', serif;
+    text-shadow: 2px 2px 2px indianred;
+}
+
+.subBanner {
     font-family: 'Cinzel', serif;
     text-shadow: 2px 2px 2px indianred;
 }

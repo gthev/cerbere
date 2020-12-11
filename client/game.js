@@ -17,12 +17,15 @@ var Banner = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (Banner.__proto__ || Object.getPrototypeOf(Banner)).call(this, props));
 
         _this.state = {
-            text: ""
+            text: "",
+            subtext: ""
         };
 
         _this.updateText = _this.updateText.bind(_this);
+        _this.updateSubText = _this.updateSubText.bind(_this);
 
         io_socket.on("updateBannerText", _this.updateText);
+        io_socket.on("updateBannerSubText", _this.updateSubText);
         return _this;
     }
 
@@ -30,6 +33,11 @@ var Banner = function (_React$Component) {
         key: "updateText",
         value: function updateText(new_text) {
             this.setState({ text: new_text });
+        }
+    }, {
+        key: "updateSubText",
+        value: function updateSubText(new_text) {
+            this.setState({ subtext: new_text });
         }
     }, {
         key: "render",
@@ -41,6 +49,11 @@ var Banner = function (_React$Component) {
                     "h3",
                     { className: "banner" },
                     this.state.text
+                ),
+                React.createElement(
+                    "h5",
+                    { className: "subBanner" },
+                    this.state.subtext
                 )
             );
         }
@@ -207,7 +220,6 @@ var Chat = function (_React$Component3) {
         _this4.displayWhisper = _this4.displayWhisper.bind(_this4);
         _this4.handleSubmit = _this4.handleSubmit.bind(_this4);
 
-        //TODO : code displayGeneralMessage
         io_socket.on('displayGeneralMessage', _this4.displayGeneralMessage);
         io_socket.on('displayWhisper', _this4.displayWhisper);
         io_socket.on('displayAlertMessage', _this4.displayAlertMessage);
@@ -940,6 +952,8 @@ var MapCells = function (_React$Component7) {
 
             this.drawBorders();
             this.drawSpecifics();
+            this.drawPawns();
+            this.drawCerbere();
         }
     }, {
         key: "drawSpecifics",
@@ -964,6 +978,20 @@ var MapCells = function (_React$Component7) {
             }.bind(this));
         }
     }, {
+        key: "drawPawns",
+        value: function drawPawns() {
+            this.state.cells.forEach(function (cell) {
+                cell.players.forEach(function (playerColor) {
+                    drawPawn("pawnMapCanvas" + playerColor, playerColor);
+                }.bind(this));
+            }.bind(this));
+        }
+    }, {
+        key: "drawCerbere",
+        value: function drawCerbere() {
+            drawCerbereHandle("pawnMapCanvasCerbere");
+        }
+    }, {
         key: "handleMouseClick",
         value: function handleMouseClick(cellNumber) {
             if (!this.state.highlighted.includes(cellNumber)) return;
@@ -973,7 +1001,8 @@ var MapCells = function (_React$Component7) {
         key: "colorHightlighted",
         value: function colorHightlighted() {
             for (var i = 0; i < this.state.cells.length; i++) {
-                var divCell = document.getElementById("cellContainer" + i);
+                // here, change cellDiv to cellContainer
+                var divCell = document.getElementById("cellDiv" + i);
                 if (divCell == undefined) continue;
                 if (this.state.highlighted.includes(i)) {
                     divCell.style.border = "medium solid green";
@@ -1062,8 +1091,20 @@ var MapCells = function (_React$Component7) {
                         React.createElement(
                             "div",
                             { id: "cellDiv" + index, key: "cellDiv" + index, className: "mapCell" },
-                            cell.players,
-                            this.state.pos_cerbere == index ? "CERBERE" : ""
+
+                            // here we draw the pawns
+                            cell.players.map(function (colorPawn) {
+                                return React.createElement(
+                                    "div",
+                                    { id: "pawnMapDiv" + colorPawn, className: "pawnMapDiv", key: "pawnMapDiv" + colorPawn },
+                                    React.createElement("canvas", { id: "pawnMapCanvas" + colorPawn, key: "pawnMapCanvas" + colorPawn })
+                                );
+                            }),
+                            this.state.pos_cerbere == index ? React.createElement(
+                                "div",
+                                { id: "pawnMapDivCerbere", className: "pawnMapDiv" },
+                                React.createElement("canvas", { id: "pawnMapCanvasCerbere" })
+                            ) : ""
                         ),
                         React.createElement(
                             "div",
@@ -1236,11 +1277,23 @@ function playGame() {
             React.createElement(
                 "div",
                 { id: "boardArea" },
-                React.createElement(MapCells, null),
-                React.createElement(Barks, null)
+                React.createElement(MapCells, null)
             ),
             React.createElement(Deck, { psg_cards: [], action_cards: [] }),
-            React.createElement(PendingEffects, null)
+            React.createElement(
+                "div",
+                null,
+                React.createElement(
+                    "div",
+                    { className: "columnLeftEqual" },
+                    React.createElement(PendingEffects, null)
+                ),
+                React.createElement(
+                    "div",
+                    { className: "columnRightEqual" },
+                    React.createElement(Barks, null)
+                )
+            )
         ),
         React.createElement(
             "div",

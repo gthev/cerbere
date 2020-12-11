@@ -4,6 +4,7 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <title>Cerbere</title>
+    <link rel="icon" href="/client/favicon.ico" />
     <link href="/client/style.css" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Piazzolla&family=Texturina&display=swap" rel="stylesheet"> 
@@ -42,19 +43,22 @@
 
     <script id="loginScreen" type="text/template">
 
-        <div><h2>Login page</h2></div>
+        <div id="frontTitle">
+            <h1>Cerbère</h1>
+            <h2>Login page</h2>
+        </div>
 
         <form id="loginForm" method="post">
             <div>
                 <label for="passwd">Mot de passe :</label>
-                <input type="password" id="logPasswd" name="passwd">
+                <input type="password" class="loginInput" id="logPasswd" name="passwd">
             </div>
             <div>
                 <label for="mail">Pseudo :</label>
-                <input type="text" id="logPseudo" name="pseudo" minlength="3" maxlength="15">
+                <input type="text" id="logPseudo" class="loginInput" name="pseudo" minlength="3" maxlength="15" autoComplete="off">
             </div>
-            <div class="loginButton">
-                <button type="submit">Login</button>
+            <div id="loginButtonDiv">
+                <button type="submit" class="button" id="loginButton">Login</button>
             </div>
 
         </form>
@@ -68,8 +72,11 @@
         <div class="chatArea" id="chatAreaPrep">
             <div class="chatLog" id="chatLogPrep"></div>
             <form class="chatForm" id="chatFormPrep">
-                <input class="chatInput" id="chatInputPrep" type="text"></input>
+                <input class="chatInput" id="chatInputPrep" type="text" autoComplete="off"></input>
             </form>
+        </div>
+        <div id="beginGameButtonDiv">
+            <button type="button" class="button" id="boutonGaspard">Démarrer le jeu</div>
         </div>
 
     </script>
@@ -90,11 +97,6 @@
     <script src="/client/draw.js"></script>
     <script src="/client/game.js"></script>
     <script src="/client/app.js"></script>
-
-    <!-- debug test-->
-    <script>
-        
-    </script>
 
 </body>
 </html>

@@ -4,22 +4,30 @@ class Banner extends React.Component {
     constructor(props) {
         super(props);
         this.state={
-            text: ""
+            text: "",
+            subtext: "",
         }
 
         this.updateText = this.updateText.bind(this);
+        this.updateSubText = this.updateSubText.bind(this);
 
         io_socket.on("updateBannerText", this.updateText);
+        io_socket.on("updateBannerSubText", this.updateSubText);
     }
 
     updateText(new_text) {
         this.setState({text: new_text});
     }
 
+    updateSubText(new_text) {
+        this.setState({subtext: new_text})
+    }
+
     render() {
         return (
             <div className="bannerDiv">
                 <h3 className="banner">{this.state.text}</h3>
+                <h5 className="subBanner">{this.state.subtext}</h5>
             </div>
         );
     }
@@ -138,7 +146,6 @@ class Chat extends React.Component {
         this.displayWhisper = this.displayWhisper.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
 
-        //TODO : code displayGeneralMessage
         io_socket.on('displayGeneralMessage', this.displayGeneralMessage);
         io_socket.on('displayWhisper', this.displayWhisper);
         io_socket.on('displayAlertMessage', this.displayAlertMessage);
@@ -682,6 +689,8 @@ class MapCells extends React.Component {
 
         this.drawBorders();
         this.drawSpecifics();
+        this.drawPawns();
+        this.drawCerbere();
     }
 
     drawSpecifics() {
@@ -705,13 +714,26 @@ class MapCells extends React.Component {
         }.bind(this));
     }
 
+    drawPawns() {
+        this.state.cells.forEach((function(cell){
+            cell.players.forEach((function(playerColor){
+                drawPawn("pawnMapCanvas"+playerColor, playerColor);
+            }).bind(this));
+        }).bind(this));
+    }
+
+    drawCerbere() {
+        drawCerbereHandle("pawnMapCanvasCerbere");
+    }
+
     handleMouseClick(cellNumber) {
         if(!this.state.highlighted.includes(cellNumber)) return;
         io_socket.emit('selectedMapCell', cellNumber);
     }
     colorHightlighted() {
         for(let i=0; i<this.state.cells.length; i++) {
-            let divCell = document.getElementById("cellContainer"+i);
+            // here, change cellDiv to cellContainer
+            let divCell = document.getElementById("cellDiv"+i);
             if(divCell == undefined) continue;
             if(this.state.highlighted.includes(i)) {
                 divCell.style.border = "medium solid green";
@@ -777,7 +799,14 @@ class MapCells extends React.Component {
             onClick={() => this.handleMouseClick(index)}>
                 <div id={"cellBorder"+index} className="mapCellStateBorder">
                     <div id={"cellDiv"+index} key={"cellDiv"+index} className="mapCell">
-                        {cell.players}{(this.state.pos_cerbere == index)? "CERBERE" : ""}
+                        {
+                            // here we draw the pawns
+                            cell.players.map((colorPawn) => (
+                                <div id={"pawnMapDiv"+colorPawn} className="pawnMapDiv" key={"pawnMapDiv"+colorPawn}>
+                                    <canvas id={"pawnMapCanvas"+colorPawn} key={"pawnMapCanvas"+colorPawn}></canvas>
+                                </div>
+                            ))
+                        }{(this.state.pos_cerbere == index)? <div id={"pawnMapDivCerbere"} className="pawnMapDiv"><canvas id={"pawnMapCanvasCerbere"}></canvas></div> : ""}
                     </div>
 
                     <div id={"cellSpecifics"+index} key={"cellSpecifics"+index} className="mapCell">
@@ -895,11 +924,13 @@ function playGame() {
 
                 <div id="boardArea">
                     <MapCells />
-                    <Barks />
                 </div>
 
                 <Deck psg_cards={[]} action_cards={[]}/>
-                <PendingEffects />
+                <div>
+                    <div className="columnLeftEqual"><PendingEffects /></div>
+                    <div className="columnRightEqual"><Barks /></div>
+                </div>
             </div>
             <div className="columnRight" id="gameRight">
                 <ListJoueurs joueurs={[{couleur: "white", pseudo: ""}]} />

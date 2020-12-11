@@ -15,7 +15,7 @@ for(let i=0; i<listIcons.length; i++) {
 }
 
 //============================
-// draw map specifics
+// draw map
 
 function drawMapSpecifics(idCanvas, specifics) {
     let canvas = document.getElementById(idCanvas);
@@ -32,6 +32,31 @@ function drawMapSpecifics(idCanvas, specifics) {
         console.log("Warning : drawMapSpecifics failed, unknow specifics: "+specifics);
         return;
     }
+}
+
+function drawPawn(idxCanvas, color) {
+        
+    let canvas = document.getElementById(idxCanvas)
+    if(canvas == undefined) return;
+
+    canvas.width = 20; canvas.height = 20;
+
+    let context = canvas.getContext("2d");
+
+    context.beginPath();
+    context.fillStyle=color;
+    context.arc(10, 10, 10, 0, 2 * Math.PI);
+    context.fill();
+}
+
+function drawCerbereHandle(idxCanvas) {
+    let canvasCerbere = document.getElementById(idxCanvas);
+    if(canvasCerbere == undefined) return;
+
+    let context = canvasCerbere.getContext("2d");
+    canvasCerbere.width = 30; canvasCerbere.height = 30;
+
+    context.drawImage(cacheImg["cerbere"], 0, 0, 30, 30);
 }
 
 //=============================================

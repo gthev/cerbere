@@ -233,6 +233,14 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
         return playIdx;
     }
 
+    self.findPseudoByIdx = function(idxCompet) {
+        if(self.competitors[idxCompet] != undefined) {
+            return self.competitors[idxCompet].pseudo;
+        } else {
+            return undefined;
+        }
+    }
+
     self.playerDrawActionCard = function(playIdx) {
         if(playIdx < 0) {
             console.log("Warning : playerDrawCard player not found");

@@ -24,6 +24,7 @@ jQuery(function($){
             IO.socket.on('invalidLog', this.invalidLog);
             IO.socket.on('enterPrep', this.enterPrep);
             IO.socket.on('displayWhisper', this.displayWhisper);
+            IO.socket.on('beginGame', this.beginGame);
         },
 
         displayGeneralMessage: function(data) {
@@ -44,10 +45,16 @@ jQuery(function($){
             invalidDiv.innerHTML = data;
         },
 
-        enterPrep: function() {
-            console.log("entering prep");
-            Prep.init();
+        enterPrep: function(master) {
+            console.log("entering prep with "+master);
+            Prep.init(master);
         },
+
+        beginGame: function() {
+            cache.gameArea.html(cache.runningGame);
+            // defined in game.js
+            playGame();
+        }
     }
 
     var Login = {
@@ -118,11 +125,21 @@ jQuery(function($){
     }
 
     var Prep = {
-        init : function() {
+        init : function(master) {
             cache.gameArea.html(cache.prepScreen);
             cache.chatLog = document.getElementById("chatLogPrep");
             cache.chatInput = document.getElementById("chatInputPrep");
             cache.chatForm = document.getElementById("chatFormPrep");
+            cache.beginGameButtonDiv = document.getElementById("beginGameButtonDiv");
+            cache.beginGameButton = document.getElementById("boutonGaspard");
+
+            if(!master) {
+                cache.beginGameButtonDiv.style.display = "none";
+            } else {
+                cache.beginGameButton.onclick = function() {
+                    IO.socket.emit('askBeginGame');
+                }
+            }
 
             //init of input handling
             bindChat();
@@ -132,13 +149,13 @@ jQuery(function($){
     }
 
     //commented out for debug
-    //IO.init();
+    IO.init();
     
     
-    //Login.init();
+    Login.init();
 
     //TODO : change it:
-    cache.gameArea.html(cache.runningGame);
-    playGame();
+    //cache.gameArea.html(cache.runningGame);
+    //playGame();
 
 }($));
