@@ -72,7 +72,6 @@ class ListJoueurs extends React.Component {
 
     handleClick(pseudo) {
         if(!this.state.hoverable) return;
-        console.log('emitting selectedPlayer : '+pseudo);
         io_socket.emit('selectedPlayer', pseudo);
     }
 
@@ -154,7 +153,7 @@ class Chat extends React.Component {
     scrollUpdate(id) {
         let element = document.getElementById(id);
         let topPos = element.offsetTop;
-        document.getElementById("chatLogGame").scrollTop = topPos;
+        document.getElementById("chatLogGame").scrollTop = topPos;  
     }
 
     displayGeneralMessage(data) {
@@ -939,10 +938,4 @@ function playGame() {
         </div>,
         document.getElementById('gameArea')
     );
-
-    //console.log(listplayers);
-    //listplayers.updatePlayers([{couleur: "red", pseudo: "tif"},{couleur: "yellow", pseudo: "new"}]);
-
-    //io_socket.on('updateListPlayers', listplayers.updatePlayers);
-    //io_socket.emit('gameReady');
 };

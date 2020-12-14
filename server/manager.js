@@ -1,5 +1,6 @@
 var Board = require('./board')
 var Utils = require('./utils')
+var Debug = require('./debug')
 
 /*
     list of correct status of the manager when it receives a socket message
@@ -126,7 +127,6 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                     try {
                         reaction(data, competIdx) 
                     } catch (results) {
-                        console.log("caught : "+result);
                         self.changeStatus("gameOver");
                         self.updateComponents();
                         self.reinitHoverable();
@@ -226,7 +226,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     }
 
     self.changeStatus = function(new_status) {
-        console.log("New status : "+new_status);
+        Debug.showDebug("New status : "+new_status);
         self.status = new_status;
     }
 
@@ -284,7 +284,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     //========= TRIGGERS PENDING EFFECT/COST =========
     //===============================================
     self.triggersPendingEffect = function() {
-        console.log("triggers pending effect");
+        Debug.showDebug("triggers pending effect");
         self.reinitHoverable();
         self.updateBanner(self.activePlayer, "Sélectionner un effet à appliquer.")
         self.changeStatus("waitingPendingEffect");
@@ -295,7 +295,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     }
 
     self.triggersPendingCost = function() {
-        console.log("triggers pending effect");
+        Debug.showDebug("triggers pending cost");
         self.reinitHoverable();
         self.changeStatus("waitingPendingCost");
         let competActive = self.board.competitors[self.activePlayer];
@@ -322,7 +322,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
 
         self.pending_effects = Utils.copyEffect(effect.effect);
 
-        console.log(effect);
+        Debug.showDebug(effect);
 
         // we assume there's only one discard cost
         let idx_discard = -1;
@@ -424,7 +424,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
 
                 self.reinitHoverable();
                 self.changeStatus("waitingSelectedMapCell");
-                console.log("highlighted : "+mapCellsPotential);
+                Debug.showDebug("highlighted : "+mapCellsPotential);
                 //self.alertPlayer(self.activePlayer, "Sélectionnez la case où aller.");
                 self.updateAllSubBannersExceptActive(self.getActivePseudo()+" est en train "+((effect == "step forward")? "d'avancer ": "de reculer ")+self.board.findPseudoByIdx(targetIdx));
                 self.updateBanner(self.activePlayer, "Sélectionnez la case où aller.");
@@ -597,7 +597,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     */
 
     self.bindAllCompets('selectedPendingEffect', function(effectInfo, competIdx){
-        console.log("Selected Pending Effect!")
+        Debug.showDebug("Selected Pending Effect!")
         if(!self.checkCorrectStatus('selectedPendingEffect')) return;
         let compet = self.board.competitors[competIdx];
         if(compet == undefined) return;
@@ -805,7 +805,7 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         if(self.board.competitors[competIdx] == undefined) return;
         if(competIdx != self.activePlayer) return;
 
-        console.log("Selected Map Cell");
+        Debug.showDebug("Selected Map Cell");
 
         let targetIdx = self.target_selected;
 

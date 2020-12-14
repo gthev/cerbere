@@ -6,6 +6,7 @@ var utils = require('./server/utils')
 //for now, maybe we'll change it later
 var play = require('./server/player');
 var Game = require('./server/manager');
+var Debug = require('./server/debug');
 
 
 //************
@@ -13,6 +14,10 @@ var Game = require('./server/manager');
 //************
 let DEBUG = false;
 let passwd = (DEBUG) ? "pample" : utils.gen_passwd();
+
+let verbose = 0;
+
+Debug.setDebug(verbose);
 
 // *********************
 // * STARTUP OF SERVER *
@@ -82,6 +87,11 @@ io.sockets.on('connection', function(socket){
             PLAYERS[socket.id] = player;
             
             if(SOCK_IDS.length == 3) {
+                SOCK_IDS.forEach(function(id){
+                    if(PLAYERS[id] != undefined) {
+                        SOCKET_LIST[id].emit('beginGame');
+                    }
+                });
                 GameManager = Game.newGame(2, SOCK_IDS.map((id) => (PLAYERS[id])), SOCKET_LIST, 2);
             }
 
@@ -151,13 +161,19 @@ io.sockets.on('connection', function(socket){
     }
 
     socket.on('askBeginGame', function() {
-        if(socket.id == SOCK_IDS[0] && numberPlayers() >= 3) {
-            SOCK_IDS.forEach(function(id){
-                if(PLAYERS[id] != undefined) {
-                    SOCKET_LIST[id].emit('beginGame');
-                }
-            });
-            GameManager = Game.newGame(2, SOCK_IDS.map((id) => (PLAYERS[id])), SOCKET_LIST, 2);
+        if(socket.id == SOCK_IDS[0]) {
+            if(numberPlayers() >= 3) {
+                SOCK_IDS.forEach(function(id){
+                    if(PLAYERS[id] != undefined) {
+                        SOCKET_LIST[id].emit('beginGame');
+                    }
+                });
+                GameManager = Game.newGame(2, SOCK_IDS.map((id) => (PLAYERS[id])), SOCKET_LIST, 2);
+                isGameRunning = true;
+            } else {
+                // not enough players
+                socket.emit("displayAlertMessage", "Il faut au moins trois joueurs pour commencer le jeu.");
+            }
         }
     });
 
@@ -188,7 +204,7 @@ var chatInit = function(socket) {
 
     socket.on('sendGeneralMessage', function(data){
 
-        console.log("Message received: " + data);
+        Debug.showDebug("Message received: " + data);
 
         var sender = PLAYERS[socket.id];
         var color = play.getPlayerColor(PLAYERS[socket.id]);
@@ -239,8 +255,8 @@ var chatInit = function(socket) {
     socket.on('reqDebug', function(data){
         if(!DEBUG) return;
         var res = eval(data);
+        Debug.showDebug('DEBUG REQUEST:');
+        Debug.showDebug(data);
         socket.emit('displayAlertMessage', res)
     });
 }
-
-//TODO : code Pion (couleur) players, and send messages, send pm, and DEBUG

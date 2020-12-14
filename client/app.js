@@ -28,7 +28,6 @@ jQuery(function($){
         },
 
         displayGeneralMessage: function(data) {
-            console.log("display");
             cache.chatLog.innerHTML += '<div><span style=\"font-weight:bold;color: '+data.color+';\">'+data.pseudo+': </span>'+data.text+'</div>';
         },
 
@@ -46,7 +45,6 @@ jQuery(function($){
         },
 
         enterPrep: function(master) {
-            console.log("entering prep with "+master);
             Prep.init(master);
         },
 

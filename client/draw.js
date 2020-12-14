@@ -116,16 +116,6 @@ function drawSubEffect(idCanvas, subEffect) {
 }
 
 
-/*
-effectList.forEach(function(effect){
-        if(effect.effect.targetEffects.length > widthBlock) widthBlock = effect.effect.targetEffects.length;
-        if(effect.effect.generalEffects.length > widthBlock) widthBlock = effect.effect.generalEffects.length;
-        if(effect.cost.targetEffects.length > widthBlock) widthBlock = effect.cost.targetEffects.length;
-        if(effect.cost.generalEffects.length > widthBlock) widthBlock = effect.cost.generalEffects.length;
-    });
-*/
-
-
 // ok so we ask for a list of [subeffects], and the ids of canvas associated
 function drawListEffect(idsCanvas, listEffects) {
     let widthBlock = 1;

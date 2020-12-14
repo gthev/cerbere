@@ -26,7 +26,6 @@ function gen_passwd() {
 
 function copyEffect(effect) {
     let new_effect = {targetEffects: [], generalEffects: []};
-    console.log(effect);
     new_effect.targetEffects = effect.targetEffects.map((subeffect) => (
         {
             target: subeffect.target,

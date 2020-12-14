@@ -2,6 +2,7 @@ var Map = require('./map_tiles');
 var Utils = require('./utils');
 var Piste = require('./piste');
 var Player = require('./player');
+var Debug = require('./debug')
 
 var Decks = require('./decks')
 
@@ -178,7 +179,7 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
         var res = [];
         // TODO : return if we can jump in bark ?
 
-        console.log("checkPossibleNextCells, player at pos "+pos+" direction "+ direction);
+        Debug.showDebug("checkPossibleNextCells, player at pos "+pos+" direction "+ direction);
 
         /* the next cell is possible if 
            - it is on the board (or it is the bark)
