@@ -72,7 +72,7 @@ map {
  *
  * @param: addCellsPiste is the number of cells that are more than the number of pawns (2 in original game)
  *         players: arrays of effective players
- *          
+ *
  * @param number_non_cerberable_players: from this number of players, captured players don't benefit from Cebere's mercy -> dead
  *                                       default: should be 2
  */
@@ -82,7 +82,7 @@ map {
 var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_players) {
     var self = {
         init_props: {addCellsPiste: addCellsPiste, players: players, socket_list: socket_list, number_non_cerberable_players: number_non_cerberable_players},
-        
+
         map: undefined,
         piste: undefined,
         list_pions: undefined,
@@ -95,7 +95,7 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
 
         // must unveil at the end of the turn
         must_unveil: false,
-    }   
+    }
 
     self.map = Map.genNewMap();
 
@@ -270,11 +270,11 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
             console.log("Warning : playerDiscardCard player not found");
             return;
         }
-        
+
         if(compet.status == "alive") {Decks.discardSurvivalCard(card);}
         else if(compet.status == "cerbere") {Decks.discardTreasonCard(card);}
         else {console.log("discard card from neither alive nor cerbere ?");}
-        compet.action_cards.splice(idxCard, 1); 
+        compet.action_cards.splice(idxCard, 1);
     }
 
     self.playerCollectHeroCards = function(competIdx) {
@@ -312,7 +312,7 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
             case "self":
                 res = [active_player_idx];
                 break;
-        
+
             case "all other adventurers":
             case "any adventurer":
                 self.competitors.forEach(function(compet, idx){
@@ -337,7 +337,7 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
                     if(compet.status == "cerbere" && idx != active_player_idx) res.push(idx);
                 });
                 break;
-            
+
 
             // eg "cerbere"
             default:
@@ -346,13 +346,13 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
         return res;
     }
     // TODO :
-    /* 
+    /*
      * - OK advancePlayer, backPlayer : bouge les joueurs. Prend aussi une case en entrée ! (car potentiellement plusieurs choix)
      * - checkCost : vérifie si un coût est "payable" (en prenant en compte qu'on peut donner des cartes aux joueurs)
      * - apply effect : applique effectivement un effet, relativement à un joueur
      * - OK kill player (! update piste !)
      * - OK hunt
-     * 
+     *
      * - update functions for client !
      */
 
@@ -369,7 +369,7 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
                     case "augment dice":
                         if(!self.piste.checkAugmentDice(genEffect.addData)) return false;
                         break;
-                
+
                     case "reduce dice":
                         if(!self.piste.checkReduceDice(genEffect.addData)) return false;
                         break;
@@ -391,7 +391,7 @@ var Board = function(addCellsPiste, players, socket_list, number_non_cerberable_
                 case "hunt":
                     self.triggerHunt();
                     break;
-                
+
                 case "collect actions":
                     self.playerCollectHeroCards(activeCompet);
                     break;

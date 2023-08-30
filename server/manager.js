@@ -3,8 +3,8 @@ var Utils = require('./utils')
 var Debug = require('./debug')
 
 /*
-    list of correct status of the manager when it receives a socket message
- */
+  list of correct status of the manager when it receives a socket message
+*/
 var validMessagesWrtStatus = {
     "selectedPsgCard" : ["waitingPsgChoose"],
     "selectedActionCard" : ["waitingDiscardCost", "waitingActionChoose"],
@@ -42,7 +42,6 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         turnPosition: 0,
         pending_effects: undefined,
         pending_costs: undefined,
-        
         save_cancel : undefined,
 
         //patch exploits. todo at the end of the effect
@@ -123,9 +122,9 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
     self.bindAllCompets = function(message, reaction) {
         self.board.competitors.forEach(function(compet, competIdx){
             if(compet != undefined) {
-                compet.socket.on(message, (function(data) { 
+                compet.socket.on(message, (function(data) {
                     try {
-                        reaction(data, competIdx) 
+                        reaction(data, competIdx)
                     } catch (results) {
                         self.changeStatus("gameOver");
                         self.updateComponents();
@@ -346,7 +345,6 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
                 return;
             }
 
-            //self.alertPlayer(self.activePlayer, "Vous devez payer "+self.effectAddLeft+" cartes action pour jouer cet effet.");
             self.updateBanner(self.activePlayer, "Vous devez payer "+self.effectAddLeft+" "+((self.effectAddLeft > 1)? "cartes" : "carte")+" action pour jouer cet effet.");
             self.board.competitors[self.activePlayer].socket.emit("updateCancelActive", true);
 
@@ -383,58 +381,59 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
             return;
         }
         switch (effect) {
-            case "draw survival":
-                self.effectAddLeft = self.current_subeffect.addData;
-                if(target.status != "alive") {
-                    console.log("whenTargetSelected, trying to draw survival for non alive player");
-                    return;
-                }
-                while(self.effectAddLeft > 0) {
-                    self.board.applyEffect(self.activePlayer, "draw survival", true, {targetIdx: targetIdx});
-                    self.effectAddLeft--;
-                }
-                self.updateAllSubBannersExceptActive(self.getActivePseudo()+" a donné une carte action à "+self.board.findPseudoByIdx(targetIdx));
-                self.handleSubEffectDone();
-                break;
+        case "draw survival":
+            self.effectAddLeft = self.current_subeffect.addData;
+            if(target.status != "alive") {
+                console.log("whenTargetSelected, trying to draw survival for non alive player");
+                return;
+            }
+            while(self.effectAddLeft > 0) {
+                self.board.applyEffect(self.activePlayer, "draw survival", true, {targetIdx: targetIdx});
+                self.effectAddLeft--;
+            }
+            self.updateAllSubBannersExceptActive(self.getActivePseudo()+" a donné une carte action à "+self.board.findPseudoByIdx(targetIdx));
+            self.handleSubEffectDone();
+            break;
 
-            case "draw treason":
-                self.effectAddLeft = self.current_subeffect.addData;
-                if(target.status != "cerbere") {
-                    console.log("whenTargetSelected, trying to draw treason for non cerbere player");
-                    return;
-                }
-                while(self.effectAddLeft > 0) {
-                    self.board.applyEffect(self.activePlayer, "draw survival", true, {targetIdx: targetIdx});
-                    self.effectAddLeft--;
-                }
-                self.updateAllSubBannersExceptActive(self.getActivePseudo()+" a donné une carte action à "+self.board.findPseudoByIdx(targetIdx));
-                self.handleSubEffectDone();
-                break;
+        case "draw treason":
+            self.effectAddLeft = self.current_subeffect.addData;
+            if(target.status != "cerbere") {
+                console.log("whenTargetSelected, trying to draw treason for non cerbere player");
+                return;
+            }
+            while(self.effectAddLeft > 0) {
+                self.board.applyEffect(self.activePlayer, "draw treason", true, {targetIdx: targetIdx});
+                self.effectAddLeft--;
+            }
+            self.updateAllSubBannersExceptActive(self.getActivePseudo()+" a donné une carte trahison à "+self.board.findPseudoByIdx(targetIdx));
+            self.handleSubEffectDone();
+            break;
 
-            case "step forward":
-            case "step back":
-                self.target_selected = targetIdx;
-                let mapCellsPotential = self.board.checkPossibleNextCells(target, (effect == "step forward")? "forward" : "back");
+        case "step forward":
+        case "step back":
+            self.target_selected = targetIdx;
+            let mapCellsPotential = self.board.checkPossibleNextCells(target, (effect == "step forward")? "forward" : "back");
 
-                //if none is available : do something else douche
-                if(mapCellsPotential.length == 0) {
-                    self.alertPlayer(self.activePlayer, "Ce joueur n'a aucune case où aller. Sélectionnez en un autre.");
-                    return;
-                }
+            //if none is available : do something else douche
+            if(mapCellsPotential.length == 0) {
+                self.alertPlayer(self.activePlayer, "Ce joueur n'a aucune case où aller. Sélectionnez en un autre.");
+                return;
+            }
 
-                self.reinitHoverable();
-                self.changeStatus("waitingSelectedMapCell");
-                Debug.showDebug("highlighted : "+mapCellsPotential);
-                //self.alertPlayer(self.activePlayer, "Sélectionnez la case où aller.");
-                self.updateAllSubBannersExceptActive(self.getActivePseudo()+" est en train "+((effect == "step forward")? "d'avancer ": "de reculer ")+self.board.findPseudoByIdx(targetIdx));
-                self.updateBanner(self.activePlayer, "Sélectionnez la case où aller.");
-                self.board.competitors[self.activePlayer].socket.emit('updateMapHighlighted', mapCellsPotential);
-                self.board.competitors[self.activePlayer].socket.emit('updateCancelActive', true);
-                break;
-        
-            default:
-                console.log("whenTargetSelected : unknown effect "+effect);
-                break;
+            self.reinitHoverable();
+            self.changeStatus("waitingSelectedMapCell");
+            Debug.showDebug("highlighted : "+mapCellsPotential);
+            //self.alertPlayer(self.activePlayer, "Sélectionnez la case où aller.");
+            self.updateAllSubBannersExceptActive(self.getActivePseudo()+" est en train "+((effect == "step forward")? "d'avancer ": "de reculer ")
+                                                 +self.board.findPseudoByIdx(targetIdx));
+            self.updateBanner(self.activePlayer, "Sélectionnez la case où aller.");
+            self.board.competitors[self.activePlayer].socket.emit('updateMapHighlighted', mapCellsPotential);
+            self.board.competitors[self.activePlayer].socket.emit('updateCancelActive', true);
+            break;
+
+        default:
+            console.log("whenTargetSelected : unknown effect "+effect);
+            break;
         }
 
         self.updateComponents();
@@ -454,18 +453,17 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         }
 
         /*
-         check the turn, and if empty, continue as expected
-         */
+          check the turn, and if empty, continue as expected
+        */
 
         // but first, we reinitialize all hoverable
-        
-        
-         //TODO : check if the state is right ? maybe ?
+
+        //TODO : check if the state is right ? maybe ?
         if(isEffectEmpty(self.pending_effects)) {
             if(isEffectEmpty(self.pending_costs)) {
 
-               // we have to change state
-               // if we were at turn 1, we go at turn 2 and pending effect, else the turn is finished
+                // we have to change state
+                // if we were at turn 1, we go at turn 2 and pending effect, else the turn is finished
                 if(self.turnPosition == 1) {
 
                     // send alerts that have to be sent to the players
@@ -536,64 +534,64 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         if(compet == undefined) return;
 
         switch (self.status) {
-            case 'waitingDiscardCost':
-                if(self.board.competitors[competIdx] == undefined) return;
-                if(!self.target.includes(competIdx)) return;
+        case 'waitingDiscardCost':
+            if(self.board.competitors[competIdx] == undefined) return;
+            if(!self.target.includes(competIdx)) return;
 
-                let discarded_card = self.board.findAvailableActionByIdx(competIdx, idxCard);
-                if(discarded_card == undefined) return;
+            let discarded_card = self.board.findAvailableActionByIdx(competIdx, idxCard);
+            if(discarded_card == undefined) return;
 
-                // dans l'ordre : on discard la carte, on descend le nombre de cartes à payer, et si c'est bon, on passe aux effets
-                self.board.playerDiscardActionCard(competIdx, discarded_card.card, discarded_card.idxCard);
+            // dans l'ordre : on discard la carte, on descend le nombre de cartes à payer, et si c'est bon, on passe aux effets
+            self.board.playerDiscardActionCard(competIdx, discarded_card.card, discarded_card.idxCard);
 
-                self.effectAddLeft--;
+            self.effectAddLeft--;
 
-                if(self.effectAddLeft <= 0) {
-                    //we deactive the action hoverable to every one
-                    self.updateBanner(self.activePlayer, "");
-                    self.board.emitToAll('updateActionHoverable', false);
-                    self.triggersPendingEffect();
-                }
-
-                break;
-
-            case 'waitingActionChoose':
-                // we check that it's from the player we were expecting
-                let compet = self.board.competitors[competIdx];
-                if(self.activePlayer != competIdx || compet == undefined) {
-                    console.log("Warning : received waitngActionChoose from incorrect player " + competIdx);
-                    return;
-                }
-
-                let selected_effect = self.board.findAvailableActionByIdx(competIdx, idxCard);
-
-                if(selected_effect == undefined) return;
-
-                let selected_name = selected_effect.card.name;
-
-                // we also save the state
-                self.saveState();
-
+            if(self.effectAddLeft <= 0) {
+                //we deactive the action hoverable to every one
                 self.updateBanner(self.activePlayer, "");
-
-                self.turnPosition = 2;
                 self.board.emitToAll('updateActionHoverable', false);
-                if(!self.handleNewEffect(selected_effect.effect)) return;
-                self.board.playerDiscardActionCard(competIdx, selected_effect.card, selected_effect.idxCard);
+                self.triggersPendingEffect();
+            }
 
-                self.updateAllSubBannersExceptActive(self.getActivePseudo()+" a choisi la carte action "+selected_name);
-                break;
-        
-            default:
-                console.log("Warning : selectedActionCard : status not handled");
-                break;
+            break;
+
+        case 'waitingActionChoose':
+            // we check that it's from the player we were expecting
+            let compet = self.board.competitors[competIdx];
+            if(self.activePlayer != competIdx || compet == undefined) {
+                console.log("Warning : received waitngActionChoose from incorrect player " + competIdx);
+                return;
+            }
+
+            let selected_effect = self.board.findAvailableActionByIdx(competIdx, idxCard);
+
+            if(selected_effect == undefined) return;
+
+            let selected_name = selected_effect.card.name;
+
+            // we also save the state
+            self.saveState();
+
+            self.updateBanner(self.activePlayer, "");
+
+            self.turnPosition = 2;
+            self.board.emitToAll('updateActionHoverable', false);
+            if(!self.handleNewEffect(selected_effect.effect)) return;
+            self.board.playerDiscardActionCard(competIdx, selected_effect.card, selected_effect.idxCard);
+
+            self.updateAllSubBannersExceptActive(self.getActivePseudo()+" a choisi la carte action "+selected_name);
+            break;
+
+        default:
+            console.log("Warning : selectedActionCard : status not handled");
+            break;
         }
 
         self.updateComponents();
     });
 
     /*
-     even more fun part lol
+      even more fun part lol
     */
 
     self.bindAllCompets('selectedPendingEffect', function(effectInfo, competIdx){
@@ -605,155 +603,159 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         if(self.activePlayer != competIdx) return;
 
         switch (self.status) {
-            case 'waitingPendingEffect':
-            case 'waitingPendingCost':
-                let targeted = effectInfo.targeted;
-                let effectIdx = effectInfo.idx;
-                let selEffect;
-                let pending_list = (self.status == "waitingPendingCost")? self.pending_costs: self.pending_effects;
-                self.targeted = targeted;
+        case 'waitingPendingEffect':
+        case 'waitingPendingCost':
+            let targeted = effectInfo.targeted;
+            let effectIdx = effectInfo.idx;
+            let selEffect;
+            let pending_list = (self.status == "waitingPendingCost")? self.pending_costs: self.pending_effects;
+            self.targeted = targeted;
 
-                if(targeted) {
-                    selEffect = pending_list.targetEffects[effectIdx];
-                    if(selEffect == undefined) {
-                        console.log("Warning : selected undefined pending effect");
-                        return;
-                    }
+            if(targeted) {
+                selEffect = pending_list.targetEffects[effectIdx];
+                if(selEffect == undefined) {
+                    console.log("Warning : selected undefined pending effect");
+                    return;
+                }
 
-                    self.current_subeffect = {target: selEffect.target, effect: selEffect.effect, addData: selEffect.addData};
+                self.current_subeffect = {target: selEffect.target, effect: selEffect.effect, addData: selEffect.addData};
 
-                    pending_list.targetEffects.splice(effectIdx, 1);
+                pending_list.targetEffects.splice(effectIdx, 1);
 
-                    switch (self.current_subeffect.effect) {
-                        case "step forward":
-                        case "step back":
-                        case "draw survival":
-                        case "draw treason":
-                            self.effectAddLeft = self.current_subeffect.addData;
+                switch (self.current_subeffect.effect) {
+                case "step forward":
+                case "step back":
+                case "draw survival":
+                case "draw treason":
+                    self.effectAddLeft = self.current_subeffect.addData;
 
-                            
-                            if(self.current_subeffect.target == "self") {
-                                //we go directly to effect application
-                                self.updateBanner(self.activePlayer, "");
-                                self.whenTargetSelected(competIdx, self.current_subeffect.effect);
+                    if(self.current_subeffect.target == "self") {
+                        //we go directly to effect application
+                        self.updateBanner(self.activePlayer, "");
+                        self.whenTargetSelected(competIdx, self.current_subeffect.effect);
 
-                            } else if (self.current_subeffect.target == "all other adventurers") { 
-                                
-                                //we want to apply the effect to all adventurers... that's what we accept for now
-                                let theEffect = self.current_subeffect.effect;
-                                if(theEffect == "step forward" || theEffect == "step back") {
+                    } else if (self.current_subeffect.target == "all other adventurers") {
+                        //we want to apply the effect to all adventurers... that's what we accept for now
+                        let theEffect = self.current_subeffect.effect;
+                        if(theEffect == "step forward" || theEffect == "step back") {
 
-                                    let listCompet = self.board.targetToListOfPlayers("all other adventurers");
-                                    listCompet.forEach(function(targetIdx){
-                                        for(let i=0; i<self.current_subeffect.addData; i++) {
-                                            let potentialCells = self.board.checkPossibleNextCells(self.board.competitors[targetIdx], (theEffect == "step forward")? "forward" : "back");
-                                            if(potentialCells.length > 0) {
-                                                self.board.applyEffect(self.activePlayer, theEffect, true, {targetIdx: targetIdx, cellNumber: potentialCells[0]});
-                                            } else {
-                                                break;
-                                            }
-                                        }
-                                    });
-                                    self.reinitHoverable();
-                                    self.updateBanner(self.activePlayer, "");
-                                    self.handleSubEffectDone();
-
-                                } else {
-                                    console.log("selectedPendingEffect: unknown effect associated with all other adventurers : "+theEffect);
-                                    return;
+                            let listCompet = self.board.targetToListOfPlayers("all other adventurers");
+                            listCompet.forEach(function(targetIdx){
+                                for(let i=0; i<self.current_subeffect.addData; i++) {
+                                    let potentialCells = self.board.checkPossibleNextCells(self.board.competitors[targetIdx],
+                                                                                           (theEffect == "step forward")? "forward" : "back");
+                                    if(potentialCells.length > 0) {
+                                        self.board.applyEffect(self.activePlayer, theEffect, true, {targetIdx: targetIdx, cellNumber: potentialCells[0]});
+                                    } else {
+                                        break;
+                                    }
                                 }
-                                
+                            });
+                            self.reinitHoverable();
+                            self.updateBanner(self.activePlayer, "");
+                            self.handleSubEffectDone();
 
-                            } else if(self.current_subeffect.target == "cerbere"){
+                        } else {
+                            console.log("selectedPendingEffect: unknown effect associated with all other adventurers : "+theEffect);
+                            return;
+                        }
 
-                                let theEffect = self.current_subeffect.effect;
-                                if(theEffect == "step forward" || theEffect == "step back") {
 
-                                    self.updateBanner(self.activePlayer, "");
-                                    let numberSteps = self.current_subeffect.addData;
-                                    if(theEffect == "step back") numberSteps *= -1;
-                                    self.board.applyEffect(self.active_player, theEffect, true, {targetIdx: -1, cellNumber: numberSteps});
-                                    self.handleSubEffectDone();
-                                } else {
-                                    console.log("selectedPendingEffect: unknown effect associated with cerbere : "+theEffect);
-                                    return;
-                                }
-                            
-                            // we want the player to select someone
-                            } else {
-                                self.updateBanner(self.activePlayer, "");
-                                self.changeStateSelectPlayer();
-                            }
-                            break;
-                    
-                        case "discard":
-                            // TODO : in fact, carte "sabotage"...
-                            console.log(" selectedPendingEffect : discard not handled, shouldn't happen actually, I think (at least for now)");
-                            //sorry for wat im about todo
-                            poiuytreza = 1; // so that the server crashes... TODO : change it later
-                            break;
+                    } else if(self.current_subeffect.target == "cerbere"){
 
-                        default:
-                            break;
+                        let theEffect = self.current_subeffect.effect;
+                        if(theEffect == "step forward" || theEffect == "step back") {
+
+                            self.updateBanner(self.activePlayer, "");
+                            let numberSteps = self.current_subeffect.addData;
+                            if(theEffect == "step back") numberSteps *= -1;
+                            self.board.applyEffect(self.active_player, theEffect, true, {targetIdx: -1, cellNumber: numberSteps});
+                            self.handleSubEffectDone();
+                        } else {
+                            console.log("selectedPendingEffect: unknown effect associated with cerbere : "+theEffect);
+                            return;
+                        }
+                        // we want the player to select someone
+                    } else {
+                        self.updateBanner(self.activePlayer, "");
+                        let listCompet = self.board.targetToListOfPlayers(self.current_subeffect.target);
+                        if(listCompet.length > 0) {
+                            self.changeStateSelectPlayer();
+                        } else {
+                            self.alertPlayer(self.activePlayer, "Il n'y a pas de destinataire possible. L'effet est sauté.");
+                            self.handleSubEffectDone();
+                        }
                     }
+                    break;
+
+                case "discard":
+                    // TODO : in fact, carte "sabotage"...
+                    console.log(" selectedPendingEffect : discard not handled, shouldn't happen actually, I think (at least for now)");
+                    //sorry for wat im about todo
+                    poiuytreza = 1; // so that the server crashes... TODO : change it later
+                    break;
+
+                default:
+                    break;
+                }
 
                 //handle choose of psg
-                } else {
-                    selEffect = pending_list.generalEffects[effectIdx];
-                    if(selEffect == undefined) {
-                        console.log("Warning : selected undefined pending effect");
-                        return;
-                    }
-
-                    self.current_subeffect = {effect: selEffect.effect, addData: selEffect.addData};
-                    self.effectAddLeft = selEffect.addData;
-
-                    pending_list.generalEffects.splice(effectIdx, 1);
-
-                    switch (self.current_subeffect.effect) {
-                        case "hunt":
-                        case "collect actions":
-                            self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, undefined);
-                            self.updateAllSubBannersExceptActive(self.getActivePseudo()+" recupère ses cartes.");
-                            self.updateBanner(self.activePlayer, "");
-                            self.handleSubEffectDone();
-                            break;
-
-                        case "advance dice":
-                        case "back dice":
-                        case "augment dice":
-                        case "reduce dice":
-                            self.effectAddLeft = self.current_subeffect.addData;
-                            while(self.effectAddLeft > 0) {
-                                self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, undefined);
-                                self.effectAddLeft--;
-                            }
-
-                            self.updateAllSubBannersExceptActive(self.getActivePseudo()+" va faire un effet sur le dé.");
-                            self.updateBanner(self.activePlayer, "");
-                            self.handleSubEffectDone();
-                            break;
-
-                        case "bark":
-                            if(!self.triggerBarkChoose()) {
-                                //it means that the barks are already unveiled
-                                self.alertPlayer(self.activePlayer, "Les barques sont déjà révélées");
-                                break;
-                            }
-                            self.updateAllSubBannersExceptActive(self.getActivePseudo()+" va regarder ou échanger des barques.");
-                            self.updateBanner(self.activePlayer, "");
-                            break;
-
-                        default:
-                            console.log("selectedPendingEffect: don't know this subeffect : "+self.current_subeffect.effect);
-                            break;
-                    }
+            } else {
+                selEffect = pending_list.generalEffects[effectIdx];
+                if(selEffect == undefined) {
+                    console.log("Warning : selected undefined pending effect");
+                    return;
                 }
-                break;
-        
-            default:
-                console.log("Warning : selectedPendingEffect : status not handled");
-                break;
+
+                self.current_subeffect = {effect: selEffect.effect, addData: selEffect.addData};
+                self.effectAddLeft = selEffect.addData;
+
+                pending_list.generalEffects.splice(effectIdx, 1);
+
+                switch (self.current_subeffect.effect) {
+                case "hunt":
+                case "collect actions":
+                    self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, undefined);
+                    self.updateAllSubBannersExceptActive(self.getActivePseudo()+" recupère ses cartes.");
+                    self.updateBanner(self.activePlayer, "");
+                    self.handleSubEffectDone();
+                    break;
+
+                case "advance dice":
+                case "back dice":
+                case "augment dice":
+                case "reduce dice":
+                    self.effectAddLeft = self.current_subeffect.addData;
+                    while(self.effectAddLeft > 0) {
+                        self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, undefined);
+                        self.effectAddLeft--;
+                    }
+
+                    self.updateAllSubBannersExceptActive(self.getActivePseudo()+" va faire un effet sur le dé.");
+                    self.updateBanner(self.activePlayer, "");
+                    self.handleSubEffectDone();
+                    break;
+
+                case "bark":
+                    if(!self.triggerBarkChoose()) {
+                        //it means that the barks are already unveiled
+                        self.alertPlayer(self.activePlayer, "Les barques sont déjà révélées");
+                        break;
+                    }
+                    self.updateAllSubBannersExceptActive(self.getActivePseudo()+" va regarder ou échanger des barques.");
+                    self.updateBanner(self.activePlayer, "");
+                    break;
+
+                default:
+                    console.log("selectedPendingEffect: don't know this subeffect : "+self.current_subeffect.effect);
+                    break;
+                }
+            }
+            break;
+
+        default:
+            console.log("Warning : selectedPendingEffect : status not handled");
+            break;
         }
         self.updateComponents();
     });
@@ -768,33 +770,33 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         }
 
         switch (self.status) {
-            case "waitingSelectedPlayer":
-                // check, to avoid making errors
-                if(!self.targeted) {
-                    console.log("Warning : waitingSelectedPlayer but no expected targeted");
-                    return;
-                }
-                if(self.current_subeffect == undefined) {
-                    console.log("Warning : waitingSelectedPlayer but no current subeffect");
-                    return;
-                }
-                
-                // let's go
-                let candidates = self.board.targetToListOfPlayers(self.activePlayer, self.current_subeffect.target);
-                if(!candidates.includes(selectedIdx)) {
-                    self.alertPlayer(competIdx, "Vous ne pouvez pas sélectionner ce joueur. Recommencez plz.");
-                    return;
-                }
+        case "waitingSelectedPlayer":
+            // check, to avoid making errors
+            if(!self.targeted) {
+                console.log("Warning : waitingSelectedPlayer but no expected targeted");
+                return;
+            }
+            if(self.current_subeffect == undefined) {
+                console.log("Warning : waitingSelectedPlayer but no current subeffect");
+                return;
+            }
 
-                self.updateBanner(self.activePlayer, "");
+            // let's go
+            let candidates = self.board.targetToListOfPlayers(self.activePlayer, self.current_subeffect.target);
+            if(!candidates.includes(selectedIdx)) {
+                self.alertPlayer(competIdx, "Vous ne pouvez pas sélectionner ce joueur. Recommencez plz.");
+                return;
+            }
 
-                self.whenTargetSelected(selectedIdx, self.current_subeffect.effect);
+            self.updateBanner(self.activePlayer, "");
 
-                break;
-        
-            default:
-                console.log("Warning : 'selectedPlayer' handler failed because of unhandled status");
-                break;
+            self.whenTargetSelected(selectedIdx, self.current_subeffect.effect);
+
+            break;
+
+        default:
+            console.log("Warning : 'selectedPlayer' handler failed because of unhandled status");
+            break;
         }
 
         self.updateComponents();
@@ -895,56 +897,55 @@ var Manager = function(addCellsPiste, players, socket_list, number_non_cerberabl
         }
 
         switch (self.status) {
-            case "waitingSelectedSeeBark":
-                self.reinitHoverable();
-                self.updateBanner(self.activePlayer, "");
-                let barkRoom = self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, {barkEffect: "see", barkValue: numberBark});
-                self.addTurnBuffer("La barque sélectionnée a "+barkRoom+" "+((barkRoom > 1)? "places" : "place"));
-                self.alertPlayer(self.activePlayer, "Vous verrez la barque sélectionnée à la fin du tour.");
-                self.handleSubEffectDone();
-                break;
+        case "waitingSelectedSeeBark":
+            self.reinitHoverable();
+            self.updateBanner(self.activePlayer, "");
+            let barkRoom = self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, {barkEffect: "see", barkValue: numberBark});
+            self.addTurnBuffer("La barque sélectionnée a "+barkRoom+" "+((barkRoom > 1)? "places" : "place"));
+            self.alertPlayer(self.activePlayer, "Vous verrez la barque sélectionnée à la fin du tour.");
+            self.handleSubEffectDone();
+            break;
 
-            case "waitingSelectedTransposeBark1":
-                self.bark_already_selected.push(numberBark);
-                let barksLeft = Utils.rangeArray(self.board.barks.length);
-                let idxToRemove = barksLeft.indexOf(numberBark);
-                if(idxToRemove<0) {
-                    console.log("Warning waitingSelectedTransposeBark1 : idx bark not found");
-                    self.bark_already_selected = [];
-                    return;
-                }
-                barksLeft.splice(idxToRemove, 1);
-                self.reinitHoverable();
-                self.updateBanner(self.activePlayer, "");
-                compet.socket.emit("updateHoverableBarks", barksLeft);
-                //self.alertPlayer(self.activePlayer, "Sélectionnez-en une seconde.");
-                self.updateBanner(self.activePlayer, "Sélectionnez-en une seconde.");
-                self.changeStatus("waitingSelectedTransposeBark2");
-                break;
-
-            case "waitingSelectedTransposeBark2":
-                self.bark_already_selected.push(numberBark);
-                
-                self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, {barkEffect: "transpose", barkValue: self.bark_already_selected});
-                self.alertAllPlayers("Les barques "+(self.bark_already_selected[0]+1)+" et "+(self.bark_already_selected[1]+1)+" ont été échangées.");
-
+        case "waitingSelectedTransposeBark1":
+            self.bark_already_selected.push(numberBark);
+            let barksLeft = Utils.rangeArray(self.board.barks.length);
+            let idxToRemove = barksLeft.indexOf(numberBark);
+            if(idxToRemove<0) {
+                console.log("Warning waitingSelectedTransposeBark1 : idx bark not found");
                 self.bark_already_selected = [];
-                self.updateBanner(self.activePlayer, "");
-                self.handleSubEffectDone();
-                break;
-        
-            default:
-                break;
+                return;
+            }
+            barksLeft.splice(idxToRemove, 1);
+            self.reinitHoverable();
+            self.updateBanner(self.activePlayer, "");
+            compet.socket.emit("updateHoverableBarks", barksLeft);
+            //self.alertPlayer(self.activePlayer, "Sélectionnez-en une seconde.");
+            self.updateBanner(self.activePlayer, "Sélectionnez-en une seconde.");
+            self.changeStatus("waitingSelectedTransposeBark2");
+            break;
+
+        case "waitingSelectedTransposeBark2":
+            self.bark_already_selected.push(numberBark);
+            self.board.applyEffect(self.activePlayer, self.current_subeffect.effect, false, {barkEffect: "transpose", barkValue: self.bark_already_selected});
+            self.alertAllPlayers("Les barques "+(self.bark_already_selected[0]+1)+" et "+(self.bark_already_selected[1]+1)+" ont été échangées.");
+
+            self.bark_already_selected = [];
+            self.updateBanner(self.activePlayer, "");
+            self.handleSubEffectDone();
+            break;
+
+        default:
+            break;
         }
         self.updateComponents();
     });
 
-    
-    
+
+
     // we choose the first player at random
     self.activePlayer = Math.floor( Math.random() * players.length );
 
-    
+
     //init :
 
     //=============================

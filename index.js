@@ -74,7 +74,15 @@ function findIdByPseudo(pseudo) {
     return id;
 }
 
-var io = require('socket.io')(serv,{});
+const io = require('socket.io')(serv, {
+    cors: {
+        origin: "http://localhost:8100",
+        methods: ["GET", "POST"],
+        transports: ['websocket', 'polling'],
+        credentials: true
+    },
+    allowEIO3: true
+});
 
 // ***************************
 // *      SOCKET EVENTS      *

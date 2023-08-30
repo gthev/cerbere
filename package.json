@@ -1,18 +1,24 @@
 {
   "name": "cerbere",
-  "version": "0.1.0",
-  "description": "online version of Cerbere",
+  "version": "1.0.0",
+  "description": "In-brower implementation of the board game \"Cerberus\", original board game created by Pierre BUTY , edited by La Boite de Jeu and Origames.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gthev/cerbere.git"
+  },
   "author": "Gaspard Thevenon",
   "license": "ISC",
-  "dependencies": {
-    "express": "^4.17.1",
-    "socket.io": "^2.3.0",
-    "react.js": "^17.0.1"
+  "bugs": {
+    "url": "https://github.com/gthev/cerbere/issues"
   },
-  "devDependencies": {},
-  "keywords": []
+  "homepage": "https://github.com/gthev/cerbere#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "react": "^18.2.0",
+    "socket.io": "^4.7.2"
+  }
 }

@@ -37,7 +37,7 @@ var initDecks = function() {
     idx_treason = 0;
     // we fill the Survival Deck
     for (var survival_name in deckSurvivalComposition) {
-        if (deckSurvivalComposition.hasOwnProperty(survival_name)) {           
+        if (deckSurvivalComposition.hasOwnProperty(survival_name)) {
             for(var i = 0; i < deckSurvivalComposition[survival_name]; i++) {
                 var new_card = Cards.createSurvival(survival_name);
                 // we define the card's idx/key
@@ -49,7 +49,7 @@ var initDecks = function() {
 
     // idem for Treason Deck
     for (var treason_name in deckTreasonComposition) {
-        if (deckTreasonComposition.hasOwnProperty(treason_name)) {           
+        if (deckTreasonComposition.hasOwnProperty(treason_name)) {
             for(var i = 0; i < deckTreasonComposition[treason_name]; i++) {
                 var new_card = Cards.createTreason(treason_name);
                 new_card.effects.forEach(function(effect){effect.idx = idx_treason; idx_treason++});
